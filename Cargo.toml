@@ -1,0 +1,17 @@
+[package]
+name = "genfut"
+version = "0.1.0"
+authors = ["Valdemar Erk <v@erk.io>"]
+edition = "2018"
+
+[dependencies]
+bindgen = "0.49.0"
+cc = "1.0.34"
+regex = "1.1.5"
+structopt = "0.2"
+
+[features]
+default = ["sequential_c"]
+sequential_c = []
+cuda = []
+opencl = []
