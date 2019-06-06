@@ -132,13 +132,6 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String) {
     }
     writeln!(&mut buffer2, ");");
 
-    // FREE
-    for (i, e) in entry_points.iter().enumerate() {
-        if e.1.starts_with("in") && e.0.starts_with("futhark") {
-            write!(&mut buffer2, "bindings::{}::free(ctx, {} as *mut bindings::{});\n", e.0, e.1, e.0);
-        }
-    }
-
     // OUTPUT
     let mut result_counter = 0;
     write!(&mut buffer2, "(");
