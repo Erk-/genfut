@@ -31,7 +31,7 @@ impl {array_type} {{
         Vec::from(shape)
     }}
 
-    pub fn from_vec<T>(ctx: T, arr: Vec<{inner_type}>, dim: Vec<i64>) -> Self
+    pub fn from_vec<T>(ctx: T, arr: &[{inner_type}], dim: &[i64]) -> Self
     where
         T: Into<*mut bindings::futhark_context>,
     {{

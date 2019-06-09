@@ -36,7 +36,7 @@ fn gen_impl_futhark_type(input: &str) -> String {
     write!(&mut buffer,
 r#"
 impl futhark_{rust_type}_{dim}d {{
-   unsafe fn new<C>(ctx: C, arr: Vec<{rust_type}>, dim: Vec<i64>) -> *const Self
+   unsafe fn new<C>(ctx: C, arr: &[{rust_type}], dim: &[i64]) -> *const Self
    where C: Into<*mut bindings::futhark_context>
    {{
      let ctx = ctx.into();
