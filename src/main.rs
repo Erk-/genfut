@@ -33,7 +33,7 @@ struct Opt {
 
 fn main() {
     let opt = Opt::from_args();
-    let futhark_file = opt.file;//Path::new("./test/linalg.fut");
+    let futhark_file = opt.file;
     let out_dir_str = format!("./{}", opt.name);
     let out_dir = Path::new(&out_dir_str);
 
@@ -42,8 +42,14 @@ fn main() {
         println!("Error creating dir ({})", e);
     }
     
-    // Generate C code
+    // Generate C code, Though only headerfiles are needed.
+    // In general C files are generated when build at the user.
     gen_c(&futhark_file, &out_dir);
+
+    // copy futhark file
+    if let Err(e) = std::fs::copy(futhark_file, PathBuf::from(out_dir).join("lib/a.fut")) {
+        println!("Error copying file: {}", e);
+    }
 
     // Generate bindings
     let src_dir = PathBuf::from(out_dir).join("src");

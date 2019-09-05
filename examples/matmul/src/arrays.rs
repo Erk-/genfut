@@ -19,7 +19,7 @@ pub(crate) trait FutharkType {
 use crate::bindings::*;
 
 impl futhark_i32_2d {
-   unsafe fn new<C>(ctx: C, arr: Vec<i32>, dim: Vec<i64>) -> *const Self
+   unsafe fn new<C>(ctx: C, arr: &[i32], dim: &[i64]) -> *const Self
    where C: Into<*mut bindings::futhark_context>
    {
      let ctx = ctx.into();
@@ -87,7 +87,7 @@ impl Array_i32_2d {
         Vec::from(shape)
     }
 
-    pub fn from_vec<T>(ctx: T, arr: Vec<i32>, dim: Vec<i64>) -> Self
+    pub fn from_vec<T>(ctx: T, arr: &[i32], dim: &[i64]) -> Self
     where
         T: Into<*mut bindings::futhark_context>,
     {
