@@ -291,8 +291,8 @@ extern "C" {
     pub fn futhark_new_i32_2d(
         ctx: *mut futhark_context,
         data: *mut i32,
-        dim0: ::std::os::raw::c_int,
-        dim1: ::std::os::raw::c_int,
+        dim0: i64,
+        dim1: i64,
     ) -> *mut futhark_i32_2d;
 }
 extern "C" {
@@ -300,8 +300,8 @@ extern "C" {
         ctx: *mut futhark_context,
         data: *mut ::std::os::raw::c_char,
         offset: ::std::os::raw::c_int,
-        dim0: ::std::os::raw::c_int,
-        dim1: ::std::os::raw::c_int,
+        dim0: i64,
+        dim1: i64,
     ) -> *mut futhark_i32_2d;
 }
 extern "C" {

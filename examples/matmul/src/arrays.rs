@@ -26,8 +26,8 @@ impl futhark_i32_2d {
      bindings::futhark_new_i32_2d(
        ctx,
        arr.as_ptr() as *mut i32,
-       dim[0] as i32,
-dim[1] as i32,
+       dim[0],
+dim[1],
 )
      }
 }

@@ -5,7 +5,7 @@
 #include <stdint.h>
 #undef NDEBUG
 #include <assert.h>
-/* Crash and burn. */
+// Start of panic.h.
 
 #include <stdarg.h>
 
@@ -28,17 +28,18 @@ static char* msgprintf(const char *s, ...) {
   va_list vl;
   va_start(vl, s);
   size_t needed = 1 + vsnprintf(NULL, 0, s, vl);
-  char *buffer = malloc(needed);
+  char *buffer = (char*) malloc(needed);
   va_start(vl, s); /* Must re-init. */
   vsnprintf(buffer, needed, s, vl);
   return buffer;
 }
 
-/* Some simple utilities for wall-clock timing.
+// End of panic.h.
 
-   The function get_wall_time() returns the wall time in microseconds
-   (with an unspecified offset).
-*/
+// Start of timing.h.
+
+// The function get_wall_time() returns the wall time in microseconds
+// (with an unspecified offset).
 
 #ifdef _WIN32
 
@@ -65,6 +66,8 @@ static int64_t get_wall_time(void) {
 
 #endif
 
+// End of timing.h.
+
 #ifdef _MSC_VER
 #define inline __inline
 #endif
@@ -73,6 +76,8 @@ static int64_t get_wall_time(void) {
 #include <ctype.h>
 #include <errno.h>
 #include <assert.h>
+// Start of lock.h.
+
 /* A very simple cross-platform implementation of locks.  Uses
    pthreads on Unix and some Windows thing there.  Futhark's
    host-level code is not multithreaded, but user code may be, so we
@@ -126,10 +131,12 @@ static void lock_unlock(lock_t *lock) {
 
 static void free_lock(lock_t *lock) {
   /* Nothing to do for pthreads. */
-  lock = lock;
+  (void)lock;
 }
 
 #endif
+
+// End of lock.h.
 
 struct memblock {
     int *references;
@@ -143,7 +150,7 @@ struct futhark_context_config {
 struct futhark_context_config *futhark_context_config_new()
 {
     struct futhark_context_config *cfg =
-                                  malloc(sizeof(struct futhark_context_config));
+                                  (struct futhark_context_config *) malloc(sizeof(struct futhark_context_config));
     
     if (cfg == NULL)
         return NULL;
@@ -176,7 +183,8 @@ struct futhark_context {
 } ;
 struct futhark_context *futhark_context_new(struct futhark_context_config *cfg)
 {
-    struct futhark_context *ctx = malloc(sizeof(struct futhark_context));
+    struct futhark_context *ctx =
+                           (struct futhark_context *) malloc(sizeof(struct futhark_context));
     
     if (ctx == NULL)
         return NULL;
@@ -238,15 +246,10 @@ static int memblock_alloc(struct futhark_context *ctx, struct memblock *block,
     
     int ret = memblock_unref(ctx, block, desc);
     
-    block->mem = (char *) malloc(size);
-    block->references = (int *) malloc(sizeof(int));
-    *block->references = 1;
-    block->size = size;
-    block->desc = desc;
     ctx->cur_mem_usage_default += size;
     if (ctx->detail_memory)
         fprintf(stderr,
-                "Allocated %lld bytes for %s in %s (now allocated: %lld bytes)",
+                "Allocating %lld bytes for %s in %s (then allocated: %lld bytes)",
                 (long long) size, desc, "default space",
                 (long long) ctx->cur_mem_usage_default);
     if (ctx->cur_mem_usage_default > ctx->peak_mem_usage_default) {
@@ -255,6 +258,11 @@ static int memblock_alloc(struct futhark_context *ctx, struct memblock *block,
             fprintf(stderr, " (new peak).\n");
     } else if (ctx->detail_memory)
         fprintf(stderr, ".\n");
+    block->mem = (char *) malloc(size);
+    block->references = (int *) malloc(sizeof(int));
+    *block->references = 1;
+    block->size = size;
+    block->desc = desc;
     return ret;
 }
 static int memblock_set(struct futhark_context *ctx, struct memblock *lhs,
@@ -275,16 +283,12 @@ void futhark_debugging_report(struct futhark_context *ctx)
     if (ctx->debugging) { }
 }
 static int futrts_matmul(struct futhark_context *ctx,
-                         int64_t *out_out_memsizze_4620,
-                         struct memblock *out_mem_p_4621,
-                         int32_t *out_out_arrsizze_4622,
-                         int32_t *out_out_arrsizze_4623,
-                         int64_t xss_mem_sizze_4589,
-                         struct memblock xss_mem_4590,
-                         int64_t yss_mem_sizze_4591,
-                         struct memblock yss_mem_4592, int32_t sizze_4542,
-                         int32_t sizze_4543, int32_t sizze_4544,
-                         int32_t sizze_4545);
+                         struct memblock *out_mem_p_5911,
+                         int32_t *out_out_arrsizze_5912,
+                         int32_t *out_out_arrsizze_5913,
+                         struct memblock xss_mem_5886,
+                         struct memblock yss_mem_5887, int32_t n_5839,
+                         int32_t p_5840, int32_t p_5841, int32_t m_5842);
 static inline int8_t add8(int8_t x, int8_t y)
 {
     return x + y;
@@ -753,134 +757,38 @@ static inline int64_t btoi_bool_i64(bool x)
 {
     return x;
 }
-static inline int8_t sext_i8_i8(int8_t x)
-{
-    return x;
-}
-static inline int16_t sext_i8_i16(int8_t x)
-{
-    return x;
-}
-static inline int32_t sext_i8_i32(int8_t x)
-{
-    return x;
-}
-static inline int64_t sext_i8_i64(int8_t x)
-{
-    return x;
-}
-static inline int8_t sext_i16_i8(int16_t x)
-{
-    return x;
-}
-static inline int16_t sext_i16_i16(int16_t x)
-{
-    return x;
-}
-static inline int32_t sext_i16_i32(int16_t x)
-{
-    return x;
-}
-static inline int64_t sext_i16_i64(int16_t x)
-{
-    return x;
-}
-static inline int8_t sext_i32_i8(int32_t x)
-{
-    return x;
-}
-static inline int16_t sext_i32_i16(int32_t x)
-{
-    return x;
-}
-static inline int32_t sext_i32_i32(int32_t x)
-{
-    return x;
-}
-static inline int64_t sext_i32_i64(int32_t x)
-{
-    return x;
-}
-static inline int8_t sext_i64_i8(int64_t x)
-{
-    return x;
-}
-static inline int16_t sext_i64_i16(int64_t x)
-{
-    return x;
-}
-static inline int32_t sext_i64_i32(int64_t x)
-{
-    return x;
-}
-static inline int64_t sext_i64_i64(int64_t x)
-{
-    return x;
-}
-static inline uint8_t zext_i8_i8(uint8_t x)
-{
-    return x;
-}
-static inline uint16_t zext_i8_i16(uint8_t x)
-{
-    return x;
-}
-static inline uint32_t zext_i8_i32(uint8_t x)
-{
-    return x;
-}
-static inline uint64_t zext_i8_i64(uint8_t x)
-{
-    return x;
-}
-static inline uint8_t zext_i16_i8(uint16_t x)
-{
-    return x;
-}
-static inline uint16_t zext_i16_i16(uint16_t x)
-{
-    return x;
-}
-static inline uint32_t zext_i16_i32(uint16_t x)
-{
-    return x;
-}
-static inline uint64_t zext_i16_i64(uint16_t x)
-{
-    return x;
-}
-static inline uint8_t zext_i32_i8(uint32_t x)
-{
-    return x;
-}
-static inline uint16_t zext_i32_i16(uint32_t x)
-{
-    return x;
-}
-static inline uint32_t zext_i32_i32(uint32_t x)
-{
-    return x;
-}
-static inline uint64_t zext_i32_i64(uint32_t x)
-{
-    return x;
-}
-static inline uint8_t zext_i64_i8(uint64_t x)
-{
-    return x;
-}
-static inline uint16_t zext_i64_i16(uint64_t x)
-{
-    return x;
-}
-static inline uint32_t zext_i64_i32(uint64_t x)
-{
-    return x;
-}
-static inline uint64_t zext_i64_i64(uint64_t x)
-{
-    return x;
-}
+#define sext_i8_i8(x) ((int8_t) (int8_t) x)
+#define sext_i8_i16(x) ((int16_t) (int8_t) x)
+#define sext_i8_i32(x) ((int32_t) (int8_t) x)
+#define sext_i8_i64(x) ((int64_t) (int8_t) x)
+#define sext_i16_i8(x) ((int8_t) (int16_t) x)
+#define sext_i16_i16(x) ((int16_t) (int16_t) x)
+#define sext_i16_i32(x) ((int32_t) (int16_t) x)
+#define sext_i16_i64(x) ((int64_t) (int16_t) x)
+#define sext_i32_i8(x) ((int8_t) (int32_t) x)
+#define sext_i32_i16(x) ((int16_t) (int32_t) x)
+#define sext_i32_i32(x) ((int32_t) (int32_t) x)
+#define sext_i32_i64(x) ((int64_t) (int32_t) x)
+#define sext_i64_i8(x) ((int8_t) (int64_t) x)
+#define sext_i64_i16(x) ((int16_t) (int64_t) x)
+#define sext_i64_i32(x) ((int32_t) (int64_t) x)
+#define sext_i64_i64(x) ((int64_t) (int64_t) x)
+#define zext_i8_i8(x) ((uint8_t) (uint8_t) x)
+#define zext_i8_i16(x) ((uint16_t) (uint8_t) x)
+#define zext_i8_i32(x) ((uint32_t) (uint8_t) x)
+#define zext_i8_i64(x) ((uint64_t) (uint8_t) x)
+#define zext_i16_i8(x) ((uint8_t) (uint16_t) x)
+#define zext_i16_i16(x) ((uint16_t) (uint16_t) x)
+#define zext_i16_i32(x) ((uint32_t) (uint16_t) x)
+#define zext_i16_i64(x) ((uint64_t) (uint16_t) x)
+#define zext_i32_i8(x) ((uint8_t) (uint32_t) x)
+#define zext_i32_i16(x) ((uint16_t) (uint32_t) x)
+#define zext_i32_i32(x) ((uint32_t) (uint32_t) x)
+#define zext_i32_i64(x) ((uint64_t) (uint32_t) x)
+#define zext_i64_i8(x) ((uint8_t) (uint64_t) x)
+#define zext_i64_i16(x) ((uint16_t) (uint64_t) x)
+#define zext_i64_i32(x) ((uint32_t) (uint64_t) x)
+#define zext_i64_i64(x) ((uint64_t) (uint64_t) x)
 static inline float fdiv32(float x, float y)
 {
     return x / y;
@@ -1145,6 +1053,14 @@ static inline float futrts_atan2_32(float x, float y)
 {
     return atan2(x, y);
 }
+static inline float futrts_gamma32(float x)
+{
+    return tgamma(x);
+}
+static inline float futrts_lgamma32(float x)
+{
+    return lgamma(x);
+}
 static inline float futrts_round32(float x)
 {
     return rint(x);
@@ -1225,6 +1141,14 @@ static inline double futrts_atan2_64(double x, double y)
 {
     return atan2(x, y);
 }
+static inline double futrts_gamma64(double x)
+{
+    return tgamma(x);
+}
+static inline double futrts_lgamma64(double x)
+{
+    return lgamma(x);
+}
 static inline double futrts_round64(double x)
 {
     return rint(x);
@@ -1258,87 +1182,80 @@ static inline double futrts_from_bits64(int64_t x)
     return p.t;
 }
 static int futrts_matmul(struct futhark_context *ctx,
-                         int64_t *out_out_memsizze_4620,
-                         struct memblock *out_mem_p_4621,
-                         int32_t *out_out_arrsizze_4622,
-                         int32_t *out_out_arrsizze_4623,
-                         int64_t xss_mem_sizze_4589,
-                         struct memblock xss_mem_4590,
-                         int64_t yss_mem_sizze_4591,
-                         struct memblock yss_mem_4592, int32_t sizze_4542,
-                         int32_t sizze_4543, int32_t sizze_4544,
-                         int32_t sizze_4545)
+                         struct memblock *out_mem_p_5911,
+                         int32_t *out_out_arrsizze_5912,
+                         int32_t *out_out_arrsizze_5913,
+                         struct memblock xss_mem_5886,
+                         struct memblock yss_mem_5887, int32_t n_5839,
+                         int32_t p_5840, int32_t p_5841, int32_t m_5842)
 {
-    int64_t out_memsizze_4614;
-    struct memblock out_mem_4613;
+    struct memblock out_mem_5905;
     
-    out_mem_4613.references = NULL;
+    out_mem_5905.references = NULL;
     
-    int32_t out_arrsizze_4615;
-    int32_t out_arrsizze_4616;
-    bool dim_zzero_4548 = 0 == sizze_4544;
-    bool dim_zzero_4549 = 0 == sizze_4545;
-    bool old_empty_4550 = dim_zzero_4548 || dim_zzero_4549;
-    bool dim_zzero_4551 = 0 == sizze_4543;
-    bool new_empty_4552 = dim_zzero_4549 || dim_zzero_4551;
-    bool both_empty_4553 = old_empty_4550 && new_empty_4552;
-    bool dim_match_4554 = sizze_4543 == sizze_4544;
-    bool empty_or_match_4555 = both_empty_4553 || dim_match_4554;
-    bool empty_or_match_cert_4556;
+    int32_t out_arrsizze_5906;
+    int32_t out_arrsizze_5907;
+    bool dim_zzero_5845 = 0 == p_5841;
+    bool dim_zzero_5846 = 0 == m_5842;
+    bool old_empty_5847 = dim_zzero_5845 || dim_zzero_5846;
+    bool dim_zzero_5848 = 0 == p_5840;
+    bool new_empty_5849 = dim_zzero_5846 || dim_zzero_5848;
+    bool both_empty_5850 = old_empty_5847 && new_empty_5849;
+    bool dim_match_5851 = p_5840 == p_5841;
+    bool empty_or_match_5852 = both_empty_5850 || dim_match_5851;
+    bool empty_or_match_cert_5853;
     
-    if (!empty_or_match_4555) {
+    if (!empty_or_match_5852) {
         ctx->error = msgprintf("Error at %s:\n%s\n", "./lib/a.fut:4:1-5:53",
                                "function arguments of wrong shape");
-        if (memblock_unref(ctx, &out_mem_4613, "out_mem_4613") != 0)
+        if (memblock_unref(ctx, &out_mem_5905, "out_mem_5905") != 0)
             return 1;
         return 1;
     }
     
-    int32_t convop_x_4594 = sizze_4542 * sizze_4545;
-    int64_t binop_x_4595 = sext_i32_i64(convop_x_4594);
-    int64_t bytes_4593 = 4 * binop_x_4595;
-    struct memblock mem_4596;
+    int64_t binop_x_5889 = sext_i32_i64(n_5839);
+    int64_t binop_y_5890 = sext_i32_i64(m_5842);
+    int64_t binop_x_5891 = binop_x_5889 * binop_y_5890;
+    int64_t bytes_5888 = 4 * binop_x_5891;
+    struct memblock mem_5892;
     
-    mem_4596.references = NULL;
-    if (memblock_alloc(ctx, &mem_4596, bytes_4593, "mem_4596"))
+    mem_5892.references = NULL;
+    if (memblock_alloc(ctx, &mem_5892, bytes_5888, "mem_5892"))
         return 1;
-    for (int32_t i_4578 = 0; i_4578 < sizze_4542; i_4578++) {
-        for (int32_t i_4574 = 0; i_4574 < sizze_4545; i_4574++) {
-            int32_t res_4563;
-            int32_t redout_4570 = 0;
+    for (int32_t i_5875 = 0; i_5875 < n_5839; i_5875++) {
+        for (int32_t i_5871 = 0; i_5871 < m_5842; i_5871++) {
+            int32_t res_5860;
+            int32_t redout_5867 = 0;
             
-            for (int32_t i_4571 = 0; i_4571 < sizze_4543; i_4571++) {
-                int32_t x_4567 = *(int32_t *) &xss_mem_4590.mem[(i_4578 *
-                                                                 sizze_4543 +
-                                                                 i_4571) * 4];
-                int32_t x_4568 = *(int32_t *) &yss_mem_4592.mem[(i_4571 *
-                                                                 sizze_4545 +
-                                                                 i_4574) * 4];
-                int32_t res_4569 = x_4567 * x_4568;
-                int32_t res_4566 = res_4569 + redout_4570;
-                int32_t redout_tmp_4619 = res_4566;
+            for (int32_t i_5868 = 0; i_5868 < p_5840; i_5868++) {
+                int32_t x_5864 = ((int32_t *) xss_mem_5886.mem)[i_5875 *
+                                                                p_5840 +
+                                                                i_5868];
+                int32_t x_5865 = ((int32_t *) yss_mem_5887.mem)[i_5868 *
+                                                                m_5842 +
+                                                                i_5871];
+                int32_t res_5866 = x_5864 * x_5865;
+                int32_t res_5863 = res_5866 + redout_5867;
+                int32_t redout_tmp_5910 = res_5863;
                 
-                redout_4570 = redout_tmp_4619;
+                redout_5867 = redout_tmp_5910;
             }
-            res_4563 = redout_4570;
-            *(int32_t *) &mem_4596.mem[(i_4578 * sizze_4545 + i_4574) * 4] =
-                res_4563;
+            res_5860 = redout_5867;
+            ((int32_t *) mem_5892.mem)[i_5875 * m_5842 + i_5871] = res_5860;
         }
     }
-    out_arrsizze_4615 = sizze_4542;
-    out_arrsizze_4616 = sizze_4545;
-    out_memsizze_4614 = bytes_4593;
-    if (memblock_set(ctx, &out_mem_4613, &mem_4596, "mem_4596") != 0)
+    out_arrsizze_5906 = n_5839;
+    out_arrsizze_5907 = m_5842;
+    if (memblock_set(ctx, &out_mem_5905, &mem_5892, "mem_5892") != 0)
         return 1;
-    *out_out_memsizze_4620 = out_memsizze_4614;
-    (*out_mem_p_4621).references = NULL;
-    if (memblock_set(ctx, &*out_mem_p_4621, &out_mem_4613, "out_mem_4613") != 0)
+    (*out_mem_p_5911).references = NULL;
+    if (memblock_set(ctx, &*out_mem_p_5911, &out_mem_5905, "out_mem_5905") != 0)
         return 1;
-    *out_out_arrsizze_4622 = out_arrsizze_4615;
-    *out_out_arrsizze_4623 = out_arrsizze_4616;
-    if (memblock_unref(ctx, &mem_4596, "mem_4596") != 0)
+    *out_out_arrsizze_5912 = out_arrsizze_5906;
+    *out_out_arrsizze_5913 = out_arrsizze_5907;
+    if (memblock_unref(ctx, &mem_5892, "mem_5892") != 0)
         return 1;
-    if (memblock_unref(ctx, &out_mem_4613, "out_mem_4613") != 0)
+    if (memblock_unref(ctx, &out_mem_5905, "out_mem_5905") != 0)
         return 1;
     return 0;
 }
@@ -1347,10 +1264,12 @@ struct futhark_i32_2d {
     int64_t shape[2];
 } ;
 struct futhark_i32_2d *futhark_new_i32_2d(struct futhark_context *ctx,
-                                          int32_t *data, int dim0, int dim1)
+                                          int32_t *data, int64_t dim0,
+                                          int64_t dim1)
 {
     struct futhark_i32_2d *bad = NULL;
-    struct futhark_i32_2d *arr = malloc(sizeof(struct futhark_i32_2d));
+    struct futhark_i32_2d *arr =
+                          (struct futhark_i32_2d *) malloc(sizeof(struct futhark_i32_2d));
     
     if (arr == NULL)
         return bad;
@@ -1366,11 +1285,12 @@ struct futhark_i32_2d *futhark_new_i32_2d(struct futhark_context *ctx,
     return arr;
 }
 struct futhark_i32_2d *futhark_new_raw_i32_2d(struct futhark_context *ctx,
-                                              char *data, int offset, int dim0,
-                                              int dim1)
+                                              char *data, int offset,
+                                              int64_t dim0, int64_t dim1)
 {
     struct futhark_i32_2d *bad = NULL;
-    struct futhark_i32_2d *arr = malloc(sizeof(struct futhark_i32_2d));
+    struct futhark_i32_2d *arr =
+                          (struct futhark_i32_2d *) malloc(sizeof(struct futhark_i32_2d));
     
     if (arr == NULL)
         return bad;
@@ -1418,49 +1338,44 @@ int futhark_entry_matmul(struct futhark_context *ctx,
                          struct futhark_i32_2d *in0, const
                          struct futhark_i32_2d *in1)
 {
-    int64_t xss_mem_sizze_4589;
-    struct memblock xss_mem_4590;
+    struct memblock xss_mem_5886;
     
-    xss_mem_4590.references = NULL;
+    xss_mem_5886.references = NULL;
     
-    int64_t yss_mem_sizze_4591;
-    struct memblock yss_mem_4592;
+    struct memblock yss_mem_5887;
     
-    yss_mem_4592.references = NULL;
+    yss_mem_5887.references = NULL;
     
-    int32_t sizze_4542;
-    int32_t sizze_4543;
-    int32_t sizze_4544;
-    int32_t sizze_4545;
-    int64_t out_memsizze_4614;
-    struct memblock out_mem_4613;
+    int32_t n_5839;
+    int32_t p_5840;
+    int32_t p_5841;
+    int32_t m_5842;
+    struct memblock out_mem_5905;
     
-    out_mem_4613.references = NULL;
+    out_mem_5905.references = NULL;
     
-    int32_t out_arrsizze_4615;
-    int32_t out_arrsizze_4616;
+    int32_t out_arrsizze_5906;
+    int32_t out_arrsizze_5907;
     
     lock_lock(&ctx->lock);
-    xss_mem_4590 = in0->mem;
-    xss_mem_sizze_4589 = in0->mem.size;
-    sizze_4542 = in0->shape[0];
-    sizze_4543 = in0->shape[1];
-    yss_mem_4592 = in1->mem;
-    yss_mem_sizze_4591 = in1->mem.size;
-    sizze_4544 = in1->shape[0];
-    sizze_4545 = in1->shape[1];
+    xss_mem_5886 = in0->mem;
+    n_5839 = in0->shape[0];
+    p_5840 = in0->shape[1];
+    yss_mem_5887 = in1->mem;
+    p_5841 = in1->shape[0];
+    m_5842 = in1->shape[1];
     
-    int ret = futrts_matmul(ctx, &out_memsizze_4614, &out_mem_4613,
-                            &out_arrsizze_4615, &out_arrsizze_4616,
-                            xss_mem_sizze_4589, xss_mem_4590,
-                            yss_mem_sizze_4591, yss_mem_4592, sizze_4542,
-                            sizze_4543, sizze_4544, sizze_4545);
+    int ret = futrts_matmul(ctx, &out_mem_5905, &out_arrsizze_5906,
+                            &out_arrsizze_5907, xss_mem_5886, yss_mem_5887,
+                            n_5839, p_5840, p_5841, m_5842);
     
     if (ret == 0) {
-        assert((*out0 = malloc(sizeof(struct futhark_i32_2d))) != NULL);
-        (*out0)->mem = out_mem_4613;
-        (*out0)->shape[0] = out_arrsizze_4615;
-        (*out0)->shape[1] = out_arrsizze_4616;
+        assert((*out0 =
+                (struct futhark_i32_2d *) malloc(sizeof(struct futhark_i32_2d))) !=
+            NULL);
+        (*out0)->mem = out_mem_5905;
+        (*out0)->shape[0] = out_arrsizze_5906;
+        (*out0)->shape[1] = out_arrsizze_5907;
     }
     lock_unlock(&ctx->lock);
     return ret;

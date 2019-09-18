@@ -4,7 +4,7 @@ use std::fmt::Write;
 fn array_dim_expansion(n: usize) -> String {
     let mut buffer = String::new();
     for i in 0..n {
-        writeln!(&mut buffer, "dim[{}] as i32,", i).expect("Write failed!");
+        writeln!(&mut buffer, "dim[{}],", i).expect("Write failed!");
     }
     buffer
 }
@@ -72,7 +72,6 @@ impl FutharkType for futhark_{rust_type}_{dim}d {{
            rust_type=captures[1].to_owned(), 
            dim=dim, 
            array_dim=array_dim_expansion(dim),
-           //arr_type=arr_type,
     ).expect("Write failed!");
     buffer
 }
@@ -89,34 +88,3 @@ pub(crate) fn gen_impl_futhark_types(input: &Vec<String>) -> String {
     writeln!(&mut buffer, "{}", buffer2).expect("Write failed!");
     buffer
 }
-
-// fn gen_fromctx_arrays(input: &str) -> String {
-    
-// }
-//     if dim == 1 {
-//         writeln!(&mut buffer, r#"
-// impl FromCtx<Vec<{rust_type}>> for *const bindings::futhark_{rust_type}_{dim}d {{
-//     fn from_ctx(mut arr: Vec<{rust_type}>, ctx: *mut bindings::futhark_context) -> Self {{
-//         unsafe {{
-//             let length = arr.len() as i32;
-//             bindings::futhark_new_{rust_type}_{dim}d(
-//                 ctx,
-//                 arr.as_mut_ptr() as *mut {rust_type},
-//                 length) }}
-//     }}
-// }}
-
-// impl FromCtx<&Vec<{rust_type}>> for *const bindings::futhark_{rust_type}_{dim}d {{
-//     fn from_ctx(arr: &Vec<{rust_type}>, ctx: *mut bindings::futhark_context) -> Self {{
-//         unsafe {{
-//             let length = arr.len() as i32;
-//             bindings::futhark_new_{rust_type}_{dim}d(
-//                 ctx,
-//                 arr.as_ptr() as *mut {rust_type},
-//                 length) }}
-//     }}
-// }}
-// "#,
-//                  rust_type=captures[1].to_owned(), 
-//                  dim=dim).expect("Write failed!");
-//     }

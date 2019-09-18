@@ -1,3 +1,5 @@
+#pragma once
+
 /*
  * Headers
 */
@@ -30,10 +32,11 @@ char *futhark_context_get_error(struct futhark_context *ctx);
 
 struct futhark_i32_2d ;
 struct futhark_i32_2d *futhark_new_i32_2d(struct futhark_context *ctx,
-                                          int32_t *data, int dim0, int dim1);
+                                          int32_t *data, int64_t dim0,
+                                          int64_t dim1);
 struct futhark_i32_2d *futhark_new_raw_i32_2d(struct futhark_context *ctx,
-                                              char *data, int offset, int dim0,
-                                              int dim1);
+                                              char *data, int offset,
+                                              int64_t dim0, int64_t dim1);
 int futhark_free_i32_2d(struct futhark_context *ctx,
                         struct futhark_i32_2d *arr);
 int futhark_values_i32_2d(struct futhark_context *ctx,
