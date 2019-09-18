@@ -5,10 +5,10 @@ authors = ["Valdemar Erk <v@erk.io>"]
 edition = "2018"
 
 [dependencies]
-bindgen = "0.49.0"
-cc = "1.0.34"
-regex = "1.1.5"
-structopt = "0.2"
+bindgen = "0.51.0"
+cc = "1.0.45"
+regex = "1"
+structopt = "0.3.2"
 
 [features]
 default = ["sequential_c"]
