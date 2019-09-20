@@ -45,27 +45,18 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String) {
         .map(|c| (c[1].to_owned(), c[2].to_owned()))
         .collect();
     let name = re_name.captures(input).unwrap()[1].to_owned();
-    //println!("input: {}\nname: {}\n{:#?}", input, name, entry_points);
     let mut buffer = format!("pub fn {name}", name=name);
-    // for (i, e) in entry_points.iter().enumerate() {
-    //     if e.1.starts_with("in") {
-    //         write!(&mut buffer, "T{}, ", i);
-    //     }
-    // }
+
     write!(&mut buffer, "(&mut self, ");
     for (i, e) in entry_points.iter().enumerate() {
         if e.1.starts_with("in") {
-            // if e.0.starts_with("futhark") {
-            //     write!(&mut buffer, "{}: T{}, ", e.1, i);
-            // } else {
             write!(&mut buffer, "{}: {}, ",
                    e.1,
                    type_translation(String::from(e.0.clone())));
-            // }
         } 
     }
     write!(&mut buffer, ") -> ");
-    let mut output_buffer = String::from("(");
+    let mut output_buffer = String::from("Result<(");
     let mut output_counter = 0;
     for (i, e) in entry_points.iter().enumerate() {
         if e.1.starts_with("out") {
@@ -76,13 +67,9 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String) {
             write!(&mut output_buffer, "{}", type_translation(String::from(e.0.clone())));
         }
     }
-    write!(&mut output_buffer, ")");
+    write!(&mut output_buffer, ")>");
     writeln!(&mut buffer, "{}", output_buffer);
-    // for (i, e) in entry_points.iter().enumerate() {
-    //     if e.1.starts_with("in") && e.0.starts_with("futhark") {
-    //         write!(&mut buffer, "T{}: IntoCtx<futhark_{}>,\n", i, auto_ctor(&e.0));
-    //     }
-    // }
+
     write!(&mut buffer, "{{\nlet ctx = self.ptr();\nunsafe{{\n_{name}(ctx, ", name=name);
     for (i, e) in entry_points.iter().enumerate() {
         if e.1.starts_with("in") {
@@ -119,7 +106,7 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String) {
         }
     }
 
-    write!(&mut buffer2, "\nbindings::futhark_entry_{name}(ctx, ", name=name);
+    write!(&mut buffer2, "\nif bindings::futhark_entry_{name}(ctx, ", name=name);
     for (i, e) in entry_points.iter().enumerate() {
         if e.1.starts_with("out") {
             write!(&mut buffer2, "&mut raw_{}, ", e.1);
@@ -130,11 +117,12 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String) {
             write!(&mut buffer2, "{}, ", e.1);
         }
     }
-    writeln!(&mut buffer2, ");");
+    writeln!(&mut buffer2, ") != 0 {{
+return Err(FutharkError::new(ctx).into());}}");
 
     // OUTPUT
     let mut result_counter = 0;
-    write!(&mut buffer2, "(");
+    write!(&mut buffer2, "Ok(");
     for (i, e) in entry_points.iter().enumerate() {
         if e.1.starts_with("out") {
             if result_counter > 0 {

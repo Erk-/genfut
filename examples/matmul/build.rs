@@ -1,5 +1,5 @@
-extern crate cc;
 extern crate bindgen;
+extern crate cc;
 
 use std::path::PathBuf;
 use std::process::Command;
@@ -25,7 +25,7 @@ fn main() {
         .shared_flag(true)
         .warnings(false)
         .compile("a");
-    
+
     // CUDA support
     #[cfg(feature = "cuda")]
     let _ = Command::new("futhark")

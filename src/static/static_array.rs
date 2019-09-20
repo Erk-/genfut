@@ -1,5 +1,6 @@
 use crate::bindings;
 use crate::traits::*;
+use crate::{Error, Result};
 
 pub(crate) trait FutharkType {
     type RustType: Default;

@@ -31,17 +31,19 @@ impl {array_type} {{
         Vec::from(shape)
     }}
 
-    pub fn from_vec<T>(ctx: T, arr: &[{inner_type}], dim: &[i64]) -> Self
+    pub fn from_vec<T>(ctx: T, arr: &[{inner_type}], dim: &[i64]) -> Result<Self>
     where
         T: Into<*mut bindings::futhark_context>,
     {{
-        // Check if the array is the correct size, this could be disabled in
-        // release builds.
-        assert_eq!(arr.len(), (dim.iter().fold(1, |acc, e| acc * e)) as usize);
+        let expected = (dim.iter().fold(1, |acc, e| acc * e)) as usize;
+        if arr.len() != expected {{
+            return Err(Error::SizeMismatch(arr.len(), expected));
+        }}
+
         let ctx = ctx.into();
         unsafe {{
             let ptr = {futhark_type}::new(ctx, arr, dim);
-            {array_type} {{ ptr, ctx }}
+            Ok({array_type} {{ ptr, ctx }})
         }}
     }}
     
