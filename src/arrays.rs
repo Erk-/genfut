@@ -20,11 +20,13 @@ fn gen_specific_type(input: &str) -> String {
     let ftype = &captures[1];
     let arr_type = ctor_array_type(ftype, dim);
     let oftype = format!("futhark_{}_{}d", ftype, dim);
-    format!(include_str!("static/static_array_types.rs"),
-            array_type=arr_type,
-            futhark_type=oftype,
-            dim=dim,
-            inner_type=ftype)
+    format!(
+        include_str!("static/static_array_types.rs"),
+        array_type = arr_type,
+        futhark_type = oftype,
+        dim = dim,
+        inner_type = ftype
+    )
 }
 
 fn gen_impl_futhark_type(input: &str) -> String {
@@ -68,10 +70,7 @@ impl FutharkType for futhark_{rust_type}_{dim}d {{
     {{
         let ctx = ctx.into();
         bindings::futhark_free_{rust_type}_{dim}d(ctx, ptr);
-    }}}}"#,
-           rust_type=captures[1].to_owned(), 
-           dim=dim, 
-           array_dim=array_dim_expansion(dim),
+    }}}}"#, rust_type=captures[1].to_owned(), dim=dim, array_dim=array_dim_expansion(dim)
     ).expect("Write failed!");
     buffer
 }

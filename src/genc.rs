@@ -1,7 +1,7 @@
-use std::process::Command;
-use std::path::PathBuf;
-use std::io::{self, Write};
 use std::fs::create_dir;
+use std::io::{self, Write};
+use std::path::PathBuf;
+use std::process::Command;
 
 #[cfg(feature = "sequential_c")]
 pub(crate) fn gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {
@@ -13,7 +13,10 @@ pub(crate) fn gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {
         .arg("c")
         .arg("--library")
         .arg("-o")
-        .arg(format!("{}/lib/a", out_dir.to_str().expect("[gen_c] out_dir failed!")))
+        .arg(format!(
+            "{}/lib/a",
+            out_dir.to_str().expect("[gen_c] out_dir failed!")
+        ))
         .arg(in_file)
         .output()
         .expect("[gen_c] failed to execute process");
@@ -31,7 +34,10 @@ pub(crate) fn gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {
         .arg("cuda")
         .arg("--library")
         .arg("-o")
-        .arg(format!("{}/lib/a", out_dir.to_str().expect("[gen_c] out_dir failed!")))
+        .arg(format!(
+            "{}/lib/a",
+            out_dir.to_str().expect("[gen_c] out_dir failed!")
+        ))
         .arg(in_file)
         .output()
         .expect("failed to execute process");
@@ -49,7 +55,10 @@ pub(crate) fn gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {
         .arg("opencl")
         .arg("--library")
         .arg("-o")
-        .arg(format!("{}/lib/a", out_dir.to_str().expect("[gen_c] out_dir failed!")))
+        .arg(format!(
+            "{}/lib/a",
+            out_dir.to_str().expect("[gen_c] out_dir failed!")
+        ))
         .arg(in_file)
         .output()
         .expect("failed to execute process");
@@ -59,7 +68,11 @@ pub(crate) fn gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {
 
 pub(crate) fn generate_bindings(header: &std::path::Path, out: &std::path::Path) {
     let bindings = bindgen::Builder::default()
-        .header(header.to_str().expect("[generate_bindings] Error with header!"))
+        .header(
+            header
+                .to_str()
+                .expect("[generate_bindings] Error with header!"),
+        )
         .generate()
         .expect("Unable to generate bindings");
     let out_path = PathBuf::from(out);
