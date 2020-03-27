@@ -30,16 +30,20 @@ fn ctor_array_type(t: &str, dim: usize) -> String {
 
 fn auto_ctor(t: &str) -> String {
     let re_array_type = Regex::new(r"futhark_(.+)_(\d+)d").unwrap();
-    let captures = re_array_type.captures(t).unwrap();
-    let dim: usize = captures[2].parse().unwrap();
-    let ftype = &captures[1];
-    ctor_array_type(ftype, dim)
+    if let Some(captures) = re_array_type.captures(t) {
+        let dim: usize = captures[2].parse().unwrap();
+        let ftype = &captures[1];
+        ctor_array_type(ftype, dim)
+    } else {
+        "".to_string()
+    }
 }
 
 pub(crate) fn gen_entry_point(input: &str) -> (String, String) {
     let re_name = Regex::new(r"futhark_entry_(.+)\(").unwrap();
     let re_entry_points =
         Regex::new(r"(?m)\s*(?:const\s*)?(?:struct\s*)?([a-z0-9_]+)\s\**([a-z0-9]+),?\s?").unwrap();
+
     let entry_points: Vec<(String, String)> = re_entry_points
         .captures_iter(input)
         .skip(2)
