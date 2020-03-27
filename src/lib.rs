@@ -16,27 +16,10 @@ use crate::arrays::gen_impl_futhark_types;
 use crate::entry::*;
 use crate::genc::*;
 
-use structopt::StructOpt;
-
-#[derive(StructOpt, Debug)]
-#[structopt(
-    name = "genfut",
-    about = "Generates rust code to interface with generated futhark code."
-)]
-struct Opt {
-    /// Output dir
-    #[structopt(name = "NAME")]
-    name: String,
-
-    /// File to process
-    #[structopt(name = "FILE", parse(from_os_str))]
-    file: PathBuf,
-}
-
-fn main() {
-    let opt = Opt::from_args();
-    let futhark_file = opt.file;
-    let out_dir_str = format!("./{}", opt.name);
+pub fn genfut<T: AsRef<str>, P: AsRef<Path>>(name: T, futhark_file: P) {
+    let name = name.as_ref();
+    let futhark_file = futhark_file.as_ref();
+    let out_dir_str = format!("./{}", name);
     let out_dir = Path::new(&out_dir_str);
 
     // Create dir
@@ -82,7 +65,7 @@ fn main() {
     write!(&mut build_file, "{}", static_build);
 
     // Cargo.toml
-    let static_cargo = format!(include_str!("static/static_cargo.toml"), libname = opt.name);
+    let static_cargo = format!(include_str!("static/static_cargo.toml"), libname = name);
     let mut cargo_file =
         File::create(PathBuf::from(out_dir).join("Cargo.toml")).expect("File creation failed!");
     write!(&mut cargo_file, "{}", static_cargo);
@@ -117,5 +100,4 @@ fn main() {
         File::create(PathBuf::from(out_dir).join("src/lib.rs")).expect("File creation failed!");
     writeln!(&mut methods_file, "{}", static_lib);
     writeln!(&mut methods_file, "{}", gen_entry_points(&entry_points));
-    //println!("{:#?}", entry_points);
 }
