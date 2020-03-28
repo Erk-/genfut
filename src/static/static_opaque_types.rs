@@ -4,7 +4,6 @@ pub struct {opaque_type} {{
     ctx: *mut bindings::futhark_context,
 }}
 
-
 impl {opaque_type} {{
     pub(crate) unsafe fn as_raw(&self) -> *const {futhark_type} {{
          self.ptr

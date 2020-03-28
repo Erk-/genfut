@@ -176,9 +176,7 @@ return Err(FutharkError::new(ctx).into());}}"
     write!(&mut buffer2, "Ok(");
     for (i, (argtype, argname)) in arg_pairs.iter().enumerate() {
         if argname.starts_with("out") {
-            dbg!(argtype);
             if !parse_array_type(argtype).is_some() {
-                dbg!("opaque type", &argtype);
                 opaque_types.push(argtype.clone());
             }
             if result_counter > 0 {
@@ -198,8 +196,6 @@ return Err(FutharkError::new(ctx).into());}}"
         }
     }
     write!(&mut buffer2, ")\n}}");
-
-    dbg!(&opaque_types);
 
     (buffer, buffer2, opaque_types)
 }
@@ -243,7 +239,6 @@ pub(crate) fn gen_entry_points(input: &Vec<String>) -> String {
 
     opaque_types.sort();
     opaque_types.dedup();
-    dbg!(&opaque_types);
     for (i, opaque_type) in opaque_types.iter().enumerate() {
         if i > 0 {
             write!(&mut buffer2, ", ");
