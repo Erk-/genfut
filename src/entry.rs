@@ -1,5 +1,7 @@
 use std::fmt::Write;
 
+//extern crate inflector;
+use inflector::Inflector;
 use regex::Regex;
 
 fn type_translation(input: String) -> String {
@@ -28,23 +30,31 @@ fn ctor_array_type(t: &str, dim: usize) -> String {
     format!("Array_{}_{}d", t, dim)
 }
 
-fn auto_ctor(t: &str) -> String {
+fn parse_array_type(t: &str) -> Option<(String, usize)> {
     let re_array_type = Regex::new(r"futhark_(.+)_(\d+)d").unwrap();
     if let Some(captures) = re_array_type.captures(t) {
         let dim: usize = captures[2].parse().unwrap();
         let ftype = &captures[1];
-        ctor_array_type(ftype, dim)
+        Some((ftype.to_string(), dim))
     } else {
-        "".to_string()
+        None
+    }
+}
+fn auto_ctor(t: &str) -> String {
+    let re_array_type = Regex::new(r"futhark_(.+)_(\d+)d").unwrap();
+    if let Some((ftype, dim)) = parse_array_type(t) {
+        ctor_array_type(&ftype, dim)
+    } else {
+        to_opaque_type_name(t)
     }
 }
 
-pub(crate) fn gen_entry_point(input: &str) -> (String, String) {
+pub(crate) fn gen_entry_point(input: &str) -> (String, String, Vec<String>) {
     let re_name = Regex::new(r"futhark_entry_(.+)\(").unwrap();
-    let re_entry_points =
+    let re_arg_pairs =
         Regex::new(r"(?m)\s*(?:const\s*)?(?:struct\s*)?([a-z0-9_]+)\s\**([a-z0-9]+),?\s?").unwrap();
 
-    let entry_points: Vec<(String, String)> = re_entry_points
+    let arg_pairs: Vec<(String, String)> = re_arg_pairs
         .captures_iter(input)
         .skip(2)
         .map(|c| (c[1].to_owned(), c[2].to_owned()))
@@ -53,21 +63,21 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String) {
     let mut buffer = format!("pub fn {name}", name = name);
 
     write!(&mut buffer, "(&mut self, ");
-    for (i, e) in entry_points.iter().enumerate() {
-        if e.1.starts_with("in") {
+    for (i, (argtype, argname)) in arg_pairs.iter().enumerate() {
+        if argname.starts_with("in") {
             write!(
                 &mut buffer,
                 "{}: {}, ",
-                e.1,
-                type_translation(String::from(e.0.clone()))
+                argname,
+                type_translation(String::from(argtype.clone()))
             );
         }
     }
     write!(&mut buffer, ") -> ");
     let mut output_buffer = String::from("Result<(");
     let mut output_counter = 0;
-    for (i, e) in entry_points.iter().enumerate() {
-        if e.1.starts_with("out") {
+    for (i, (argtype, argname)) in arg_pairs.iter().enumerate() {
+        if argname.starts_with("out") {
             if output_counter > 0 {
                 write!(&mut output_buffer, ", ");
             }
@@ -75,7 +85,7 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String) {
             write!(
                 &mut output_buffer,
                 "{}",
-                type_translation(String::from(e.0.clone()))
+                type_translation(String::from(argtype.clone()))
             );
         }
     }
@@ -87,12 +97,12 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String) {
         "{{\nlet ctx = self.ptr();\nunsafe{{\n_{name}(ctx, ",
         name = name
     );
-    for (i, e) in entry_points.iter().enumerate() {
-        if e.1.starts_with("in") {
-            if e.0.starts_with("futhark") {
-                write!(&mut buffer, "{}.as_raw_mut(), ", e.1);
+    for (i, (argtype, argname)) in arg_pairs.iter().enumerate() {
+        if argname.starts_with("in") {
+            if argtype.starts_with("futhark") {
+                write!(&mut buffer, "{}.as_raw_mut(), ", argname);
             } else {
-                write!(&mut buffer, "{}, ", e.1);
+                write!(&mut buffer, "{}, ", argname);
             }
         }
     }
@@ -105,31 +115,35 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String) {
         "unsafe fn _{name}(ctx: *mut bindings::futhark_context, ",
         name = name
     );
-    for (i, e) in entry_points.iter().enumerate() {
-        if e.1.starts_with("in") {
-            if e.0.starts_with("futhark") {
-                write!(&mut buffer2, "{}: *const bindings::{}, ", e.1, e.0);
+    for (i, (argtype, argname)) in arg_pairs.iter().enumerate() {
+        if argname.starts_with("in") {
+            if argtype.starts_with("futhark") {
+                write!(&mut buffer2, "{}: *const bindings::{}, ", argname, argtype);
             } else {
                 write!(
                     &mut buffer2,
                     "{}: {}, ",
-                    e.1,
-                    type_translation(String::from(e.0.clone()))
+                    argname,
+                    type_translation(String::from(argtype.clone()))
                 );
             }
         }
     }
     writeln!(&mut buffer2, ") -> {} {{", output_buffer);
-    for (i, e) in entry_points.iter().enumerate() {
-        if e.1.starts_with("out") {
-            if e.0.starts_with("futhark") {
-                writeln!(&mut buffer2, "let mut raw_{} = std::ptr::null_mut();", e.1);
+    for (i, (argtype, argname)) in arg_pairs.iter().enumerate() {
+        if argname.starts_with("out") {
+            if argtype.starts_with("futhark") {
+                writeln!(
+                    &mut buffer2,
+                    "let mut raw_{} = std::ptr::null_mut();",
+                    argname
+                );
             } else {
                 writeln!(
                     &mut buffer2,
                     "let mut raw_{} = {}::default();",
-                    e.1,
-                    type_translation(String::from(e.0.clone()))
+                    argname,
+                    type_translation(String::from(argtype.clone()))
                 );
             }
         }
@@ -140,14 +154,14 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String) {
         "\nif bindings::futhark_entry_{name}(ctx, ",
         name = name
     );
-    for (i, e) in entry_points.iter().enumerate() {
-        if e.1.starts_with("out") {
-            write!(&mut buffer2, "&mut raw_{}, ", e.1);
+    for (i, (argtype, argname)) in arg_pairs.iter().enumerate() {
+        if argname.starts_with("out") {
+            write!(&mut buffer2, "&mut raw_{}, ", argname);
         }
     }
-    for (i, e) in entry_points.iter().enumerate() {
-        if e.1.starts_with("in") {
-            write!(&mut buffer2, "{}, ", e.1);
+    for (i, (argtype, argname)) in arg_pairs.iter().enumerate() {
+        if argname.starts_with("in") {
+            write!(&mut buffer2, "{}, ", argname);
         }
     }
     writeln!(
@@ -156,29 +170,61 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String) {
 return Err(FutharkError::new(ctx).into());}}"
     );
 
+    let mut opaque_types = Vec::new();
     // OUTPUT
     let mut result_counter = 0;
     write!(&mut buffer2, "Ok(");
-    for (i, e) in entry_points.iter().enumerate() {
-        if e.1.starts_with("out") {
+    for (i, (argtype, argname)) in arg_pairs.iter().enumerate() {
+        if argname.starts_with("out") {
+            dbg!(argtype);
+            if !parse_array_type(argtype).is_some() {
+                dbg!("opaque type", &argtype);
+                opaque_types.push(argtype.clone());
+            }
             if result_counter > 0 {
                 write!(&mut buffer2, ", ");
             }
             result_counter += 1;
-            if e.0.starts_with("futhark") {
+            if argtype.starts_with("futhark") {
                 writeln!(
                     &mut buffer2,
                     "{}::from_ptr(ctx, raw_{})",
-                    auto_ctor(&e.0),
-                    e.1
+                    auto_ctor(&argtype),
+                    argname
                 );
             } else {
-                writeln!(&mut buffer2, "raw_{}", e.1);
+                writeln!(&mut buffer2, "raw_{}", argname);
             }
         }
     }
     write!(&mut buffer2, ")\n}}");
-    (buffer, buffer2)
+
+    dbg!(&opaque_types);
+
+    (buffer, buffer2, opaque_types)
+}
+fn to_opaque_type_name(s: &str) -> String {
+    let mut rust_opaque_type = s.to_camel_case();
+
+    if let Some(r) = rust_opaque_type.get_mut(0..1) {
+        r.make_ascii_uppercase();
+    }
+    rust_opaque_type
+}
+
+fn gen_opaque_type(opaque_type: &str) -> String {
+    let rust_opaque_type = to_opaque_type_name(opaque_type);
+    let base_type = if opaque_type.starts_with("futhark_") {
+        &opaque_type[8..]
+    } else {
+        panic!("Apparent opaque type didn't start with futhark_.")
+    };
+    format!(
+        include_str!("static/static_opaque_types.rs"),
+        opaque_type = rust_opaque_type,
+        futhark_type = format!("bindings::{}", opaque_type),
+        base_type = base_type
+    )
 }
 
 pub(crate) fn gen_entry_points(input: &Vec<String>) -> String {
@@ -186,13 +232,29 @@ pub(crate) fn gen_entry_points(input: &Vec<String>) -> String {
         r#"impl FutharkContext {
 "#,
     );
+    let mut opaque_types = Vec::new();
     let mut buffer2 = String::new();
     for t in input {
-        let (a, b) = gen_entry_point(&t);
+        let (a, b, otypes) = gen_entry_point(&t);
+        opaque_types.extend(otypes);
         writeln!(&mut buffer, "{}", a).expect("Write failed!");
         writeln!(&mut buffer2, "{}", b).expect("Write failed!");
     }
+
+    opaque_types.sort();
+    opaque_types.dedup();
+    dbg!(&opaque_types);
+    for (i, opaque_type) in opaque_types.iter().enumerate() {
+        if i > 0 {
+            write!(&mut buffer2, ", ");
+        }
+        if opaque_type.starts_with("futhark") {
+            writeln!(&mut buffer2, "{}", gen_opaque_type(opaque_type));
+        }
+    }
+
     writeln!(&mut buffer, "}}").expect("Write failed!");
     writeln!(&mut buffer, "{}", buffer2).expect("Write failed!");
+
     buffer
 }
