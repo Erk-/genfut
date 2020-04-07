@@ -6,6 +6,7 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
+use std::process::Command;
 
 use regex::Regex;
 
@@ -25,6 +26,12 @@ pub fn genfut<T: AsRef<str>, P: AsRef<Path>>(name: T, futhark_file: P) {
     // Create dir
     if let Err(e) = create_dir(out_dir) {
         println!("Error creating dir ({})", e);
+    }
+    #[cfg(not(feature = "no-futhark"))]
+    {
+        let mut futhark_cmd = Command::new("futhark");
+        futhark_cmd.arg("pkg").arg("sync");
+        let _ = futhark_cmd.output().expect("failed: futhark pkg sync");
     }
 
     // Generate C code, Though only headerfiles are needed.
