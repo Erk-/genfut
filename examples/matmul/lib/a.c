@@ -76,6 +76,7 @@ static int64_t get_wall_time(void) {
 #include <ctype.h>
 #include <errno.h>
 #include <assert.h>
+
 // Start of lock.h.
 
 /* A very simple cross-platform implementation of locks.  Uses
@@ -138,166 +139,6 @@ static void free_lock(lock_t *lock) {
 
 // End of lock.h.
 
-struct memblock {
-    int *references;
-    char *mem;
-    int64_t size;
-    const char *desc;
-} ;
-struct futhark_context_config {
-    int debugging;
-} ;
-struct futhark_context_config *futhark_context_config_new(void)
-{
-    struct futhark_context_config *cfg =
-                                  (struct futhark_context_config *) malloc(sizeof(struct futhark_context_config));
-    
-    if (cfg == NULL)
-        return NULL;
-    cfg->debugging = 0;
-    return cfg;
-}
-void futhark_context_config_free(struct futhark_context_config *cfg)
-{
-    free(cfg);
-}
-void futhark_context_config_set_debugging(struct futhark_context_config *cfg,
-                                          int detail)
-{
-    cfg->debugging = detail;
-}
-void futhark_context_config_set_logging(struct futhark_context_config *cfg,
-                                        int detail)
-{
-    /* Does nothing for this backend. */
-    (void) cfg;
-    (void) detail;
-}
-struct futhark_context {
-    int detail_memory;
-    int debugging;
-    int profiling;
-    lock_t lock;
-    char *error;
-    int64_t peak_mem_usage_default;
-    int64_t cur_mem_usage_default;
-} ;
-struct futhark_context *futhark_context_new(struct futhark_context_config *cfg)
-{
-    struct futhark_context *ctx =
-                           (struct futhark_context *) malloc(sizeof(struct futhark_context));
-    
-    if (ctx == NULL)
-        return NULL;
-    ctx->detail_memory = cfg->debugging;
-    ctx->debugging = cfg->debugging;
-    ctx->error = NULL;
-    create_lock(&ctx->lock);
-    ctx->peak_mem_usage_default = 0;
-    ctx->cur_mem_usage_default = 0;
-    return ctx;
-}
-void futhark_context_free(struct futhark_context *ctx)
-{
-    free_lock(&ctx->lock);
-    free(ctx);
-}
-int futhark_context_sync(struct futhark_context *ctx)
-{
-    (void) ctx;
-    return 0;
-}
-char *futhark_context_get_error(struct futhark_context *ctx)
-{
-    char *error = ctx->error;
-    
-    ctx->error = NULL;
-    return error;
-}
-void futhark_context_pause_profiling(struct futhark_context *ctx)
-{
-    (void) ctx;
-}
-void futhark_context_unpause_profiling(struct futhark_context *ctx)
-{
-    (void) ctx;
-}
-static int memblock_unref(struct futhark_context *ctx, struct memblock *block,
-                          const char *desc)
-{
-    if (block->references != NULL) {
-        *block->references -= 1;
-        if (ctx->detail_memory)
-            fprintf(stderr,
-                    "Unreferencing block %s (allocated as %s) in %s: %d references remaining.\n",
-                    desc, block->desc, "default space", *block->references);
-        if (*block->references == 0) {
-            ctx->cur_mem_usage_default -= block->size;
-            free(block->mem);
-            free(block->references);
-            if (ctx->detail_memory)
-                fprintf(stderr,
-                        "%lld bytes freed (now allocated: %lld bytes)\n",
-                        (long long) block->size,
-                        (long long) ctx->cur_mem_usage_default);
-        }
-        block->references = NULL;
-    }
-    return 0;
-}
-static int memblock_alloc(struct futhark_context *ctx, struct memblock *block,
-                          int64_t size, const char *desc)
-{
-    if (size < 0)
-        panic(1, "Negative allocation of %lld bytes attempted for %s in %s.\n",
-              (long long) size, desc, "default space",
-              ctx->cur_mem_usage_default);
-    
-    int ret = memblock_unref(ctx, block, desc);
-    
-    ctx->cur_mem_usage_default += size;
-    if (ctx->detail_memory)
-        fprintf(stderr,
-                "Allocating %lld bytes for %s in %s (then allocated: %lld bytes)",
-                (long long) size, desc, "default space",
-                (long long) ctx->cur_mem_usage_default);
-    if (ctx->cur_mem_usage_default > ctx->peak_mem_usage_default) {
-        ctx->peak_mem_usage_default = ctx->cur_mem_usage_default;
-        if (ctx->detail_memory)
-            fprintf(stderr, " (new peak).\n");
-    } else if (ctx->detail_memory)
-        fprintf(stderr, ".\n");
-    block->mem = (char *) malloc(size);
-    block->references = (int *) malloc(sizeof(int));
-    *block->references = 1;
-    block->size = size;
-    block->desc = desc;
-    return ret;
-}
-static int memblock_set(struct futhark_context *ctx, struct memblock *lhs,
-                        struct memblock *rhs, const char *lhs_desc)
-{
-    int ret = memblock_unref(ctx, lhs, lhs_desc);
-    
-    (*rhs->references)++;
-    *lhs = *rhs;
-    return ret;
-}
-void futhark_debugging_report(struct futhark_context *ctx)
-{
-    if (ctx->detail_memory || ctx->profiling) {
-        fprintf(stderr, "Peak memory usage for default space: %lld bytes.\n",
-                (long long) ctx->peak_mem_usage_default);
-    }
-    if (ctx->profiling) { }
-}
-static int futrts_matmul(struct futhark_context *ctx,
-                         struct memblock *out_mem_p_5145,
-                         int32_t *out_out_arrsizze_5146,
-                         int32_t *out_out_arrsizze_5147,
-                         struct memblock xss_mem_5120,
-                         struct memblock yss_mem_5121, int32_t n_5080,
-                         int32_t p_5081, int32_t p_5082, int32_t m_5083);
 static inline uint8_t add8(uint8_t x, uint8_t y)
 {
     return x + y;
@@ -1589,6 +1430,166 @@ static inline double futrts_mad64(double a, double b, double c)
     return a * b + c;
 }
 #endif
+struct memblock {
+    int *references;
+    char *mem;
+    int64_t size;
+    const char *desc;
+} ;
+struct futhark_context_config {
+    int debugging;
+} ;
+struct futhark_context_config *futhark_context_config_new(void)
+{
+    struct futhark_context_config *cfg =
+                                  (struct futhark_context_config *) malloc(sizeof(struct futhark_context_config));
+    
+    if (cfg == NULL)
+        return NULL;
+    cfg->debugging = 0;
+    return cfg;
+}
+void futhark_context_config_free(struct futhark_context_config *cfg)
+{
+    free(cfg);
+}
+void futhark_context_config_set_debugging(struct futhark_context_config *cfg,
+                                          int detail)
+{
+    cfg->debugging = detail;
+}
+void futhark_context_config_set_logging(struct futhark_context_config *cfg,
+                                        int detail)
+{
+    /* Does nothing for this backend. */
+    (void) cfg;
+    (void) detail;
+}
+struct futhark_context {
+    int detail_memory;
+    int debugging;
+    int profiling;
+    lock_t lock;
+    char *error;
+    int64_t peak_mem_usage_default;
+    int64_t cur_mem_usage_default;
+} ;
+struct futhark_context *futhark_context_new(struct futhark_context_config *cfg)
+{
+    struct futhark_context *ctx =
+                           (struct futhark_context *) malloc(sizeof(struct futhark_context));
+    
+    if (ctx == NULL)
+        return NULL;
+    ctx->detail_memory = cfg->debugging;
+    ctx->debugging = cfg->debugging;
+    ctx->error = NULL;
+    create_lock(&ctx->lock);
+    ctx->peak_mem_usage_default = 0;
+    ctx->cur_mem_usage_default = 0;
+    return ctx;
+}
+void futhark_context_free(struct futhark_context *ctx)
+{
+    free_lock(&ctx->lock);
+    free(ctx);
+}
+int futhark_context_sync(struct futhark_context *ctx)
+{
+    (void) ctx;
+    return 0;
+}
+char *futhark_context_get_error(struct futhark_context *ctx)
+{
+    char *error = ctx->error;
+    
+    ctx->error = NULL;
+    return error;
+}
+void futhark_context_pause_profiling(struct futhark_context *ctx)
+{
+    (void) ctx;
+}
+void futhark_context_unpause_profiling(struct futhark_context *ctx)
+{
+    (void) ctx;
+}
+static int memblock_unref(struct futhark_context *ctx, struct memblock *block,
+                          const char *desc)
+{
+    if (block->references != NULL) {
+        *block->references -= 1;
+        if (ctx->detail_memory)
+            fprintf(stderr,
+                    "Unreferencing block %s (allocated as %s) in %s: %d references remaining.\n",
+                    desc, block->desc, "default space", *block->references);
+        if (*block->references == 0) {
+            ctx->cur_mem_usage_default -= block->size;
+            free(block->mem);
+            free(block->references);
+            if (ctx->detail_memory)
+                fprintf(stderr,
+                        "%lld bytes freed (now allocated: %lld bytes)\n",
+                        (long long) block->size,
+                        (long long) ctx->cur_mem_usage_default);
+        }
+        block->references = NULL;
+    }
+    return 0;
+}
+static int memblock_alloc(struct futhark_context *ctx, struct memblock *block,
+                          int64_t size, const char *desc)
+{
+    if (size < 0)
+        panic(1, "Negative allocation of %lld bytes attempted for %s in %s.\n",
+              (long long) size, desc, "default space",
+              ctx->cur_mem_usage_default);
+    
+    int ret = memblock_unref(ctx, block, desc);
+    
+    ctx->cur_mem_usage_default += size;
+    if (ctx->detail_memory)
+        fprintf(stderr,
+                "Allocating %lld bytes for %s in %s (then allocated: %lld bytes)",
+                (long long) size, desc, "default space",
+                (long long) ctx->cur_mem_usage_default);
+    if (ctx->cur_mem_usage_default > ctx->peak_mem_usage_default) {
+        ctx->peak_mem_usage_default = ctx->cur_mem_usage_default;
+        if (ctx->detail_memory)
+            fprintf(stderr, " (new peak).\n");
+    } else if (ctx->detail_memory)
+        fprintf(stderr, ".\n");
+    block->mem = (char *) malloc(size);
+    block->references = (int *) malloc(sizeof(int));
+    *block->references = 1;
+    block->size = size;
+    block->desc = desc;
+    return ret;
+}
+static int memblock_set(struct futhark_context *ctx, struct memblock *lhs,
+                        struct memblock *rhs, const char *lhs_desc)
+{
+    int ret = memblock_unref(ctx, lhs, lhs_desc);
+    
+    (*rhs->references)++;
+    *lhs = *rhs;
+    return ret;
+}
+static int futrts_matmul(struct futhark_context *ctx,
+                         struct memblock *out_mem_p_5145,
+                         int32_t *out_out_arrsizze_5146,
+                         int32_t *out_out_arrsizze_5147,
+                         struct memblock xss_mem_5120,
+                         struct memblock yss_mem_5121, int32_t n_5080,
+                         int32_t p_5081, int32_t p_5082, int32_t m_5083);
+void futhark_debugging_report(struct futhark_context *ctx)
+{
+    if (ctx->detail_memory || ctx->profiling) {
+        fprintf(stderr, "Peak memory usage for default space: %lld bytes.\n",
+                (long long) ctx->peak_mem_usage_default);
+    }
+    if (ctx->profiling) { }
+}
 static int futrts_matmul(struct futhark_context *ctx,
                          struct memblock *out_mem_p_5145,
                          int32_t *out_out_arrsizze_5146,

@@ -30,7 +30,7 @@ fn ctor_array_type(t: &str, dim: usize) -> String {
     format!("Array_{}_{}d", t, dim)
 }
 
-const RE_ARRAY_TYPE_STR: &str = r"futhark_(.+)_(\d)d";
+const RE_ARRAY_TYPE_STR: &str = r"futhark_(.+)_(\d)d\b";
 
 fn parse_array_type(t: &str) -> Option<(String, usize)> {
     let re_array_type = Regex::new(RE_ARRAY_TYPE_STR).unwrap();
