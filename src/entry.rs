@@ -211,11 +211,8 @@ fn to_opaque_type_name(s: &str) -> String {
 
 fn gen_opaque_type(opaque_type: &str) -> String {
     let rust_opaque_type = to_opaque_type_name(opaque_type);
-    let base_type = if opaque_type.starts_with("futhark_") {
-        &opaque_type[8..]
-    } else {
-        panic!("Apparent opaque type didn't start with futhark_.")
-    };
+    assert!(opaque_type.starts_with("futhark_"),);
+    let base_type = &opaque_type[8..];
     format!(
         include_str!("static/static_opaque_types.rs"),
         opaque_type = rust_opaque_type,
@@ -244,7 +241,7 @@ pub(crate) fn gen_entry_points(input: &Vec<String>) -> String {
         if i > 0 {
             write!(&mut buffer2, ", ");
         }
-        if opaque_type.starts_with("futhark") {
+        if opaque_type.starts_with("futhark_") {
             writeln!(&mut buffer2, "{}", gen_opaque_type(opaque_type));
         }
     }
