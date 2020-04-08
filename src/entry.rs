@@ -30,8 +30,10 @@ fn ctor_array_type(t: &str, dim: usize) -> String {
     format!("Array_{}_{}d", t, dim)
 }
 
+const RE_ARRAY_TYPE_STR: &str = r"futhark_(.+)_(\d)d";
+
 fn parse_array_type(t: &str) -> Option<(String, usize)> {
-    let re_array_type = Regex::new(r"futhark_(.+)_(\d+)d").unwrap();
+    let re_array_type = Regex::new(RE_ARRAY_TYPE_STR).unwrap();
     if let Some(captures) = re_array_type.captures(t) {
         let dim: usize = captures[2].parse().unwrap();
         let ftype = &captures[1];
@@ -41,7 +43,7 @@ fn parse_array_type(t: &str) -> Option<(String, usize)> {
     }
 }
 fn auto_ctor(t: &str) -> String {
-    let re_array_type = Regex::new(r"futhark_(.+)_(\d+)d").unwrap();
+    let re_array_type = Regex::new(RE_ARRAY_TYPE_STR).unwrap();
     if let Some((ftype, dim)) = parse_array_type(t) {
         ctor_array_type(&ftype, dim)
     } else {
