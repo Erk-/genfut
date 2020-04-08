@@ -1,6 +1,5 @@
 use std::fmt::Write;
 
-//extern crate inflector;
 use inflector::Inflector;
 use regex::Regex;
 
