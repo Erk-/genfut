@@ -1,5 +1,5 @@
-extern crate cc;
 extern crate bindgen;
+extern crate cc;
 
 use std::path::PathBuf;
 use std::process::Command;
@@ -25,7 +25,7 @@ fn main() {
         .shared_flag(true)
         .warnings(false)
         .compile("a");
-    
+
     // CUDA support
     #[cfg(feature = "cuda")]
     let _ = Command::new("futhark")
@@ -71,14 +71,28 @@ fn main() {
         .generate()
         .expect("Unable to generate bindings");
     #[cfg(feature = "opencl")]
-    cc::Build::new()
-        .file("./lib/a.c")
-        .flag("-fPIC")
-        .flag("-lOpenCL")
-        .shared_flag(true)
-        .compile("a");
-    #[cfg(feature = "opencl")]
-    println!("cargo:rustc-link-lib=dylib=OpenCL");
+    {
+        #[cfg(not(target_os = "macos"))]
+        {
+            cc::Build::new()
+                .file("./lib/a.c")
+                .flag("-fPIC")
+                .flag("-lOpenCL")
+                .shared_flag(true)
+                .compile("a");
+            println!("cargo:rustc-link-lib=dylib=OpenCL");
+        }
+        #[cfg(target_os = "macos")]
+        {
+            cc::Build::new()
+                .file("./lib/a.c")
+                .flag("-fPIC")
+                .flag("-framework")
+                .flag("OpenCL")
+                .shared_flag(true)
+                .compile("a");
+        }
+    }
 
     let out_path = PathBuf::from("./src/");
     bindings
