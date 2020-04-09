@@ -1,6 +1,6 @@
 # Genfut
 
-This is a tool to generate a rust libary to interact with exported functions from a futhark file.
+This is a tool to generate a Rust library to interact with exported functions from a Futhark file.
 
 ## Usage
 

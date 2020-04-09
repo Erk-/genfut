@@ -1,9 +1,9 @@
 [package]
 name = "genfut"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Valdemar Erk <v@erk.io>"]
 edition = "2018"
-license-file = "LICENSE"
+license = "ISC"
 description = "Generate bindings for Futhark"
 homepage = "https://github.com/Erk-/genfut"
 documentation = "https://docs.rs/genfut"
