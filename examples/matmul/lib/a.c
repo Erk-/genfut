@@ -1610,7 +1610,7 @@ static int futrts_matmul(struct futhark_context *ctx,
     if (!dim_match_5086) {
         ctx->error = msgprintf("Error: %s\n\nBacktrace:\n%s",
                                "function arguments of wrong shape",
-                               "-> #0  ./lib/a.fut:4:1-5:53\n");
+                               "-> #0  matmul.fut:4:1-5:53\n");
         if (memblock_unref(ctx, &out_mem_5139, "out_mem_5139") != 0)
             return 1;
         return 1;

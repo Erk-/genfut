@@ -5,7 +5,7 @@ authors = ["Valdemar Erk <v@erk.io>"]
 edition = "2018"
 
 [dependencies]
-bindgen = "0.51.0"
+bindgen = "0.53.0"
 cc = "1.0.45"
 Inflector = "0.11.4"
 regex = "1"
