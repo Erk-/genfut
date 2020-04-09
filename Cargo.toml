@@ -3,6 +3,12 @@ name = "genfut"
 version = "0.1.0"
 authors = ["Valdemar Erk <v@erk.io>"]
 edition = "2018"
+license-file = "LICENSE"
+description = "Generate bindings for Futhark"
+homepage = "https://github.com/Erk-/genfut"
+documentation = "https://docs.rs/genfut"
+readme = "README.md"
+repository = "https://github.com/Erk-/genfut"
 
 [dependencies]
 bindgen = "0.53.0"
