@@ -238,9 +238,6 @@ pub(crate) fn gen_entry_points(input: &Vec<String>) -> String {
     opaque_types.sort();
     opaque_types.dedup();
     for (i, opaque_type) in opaque_types.iter().enumerate() {
-        if i > 0 {
-            write!(&mut buffer2, ", ");
-        }
         if opaque_type.starts_with("futhark_") {
             writeln!(&mut buffer2, "{}", gen_opaque_type(opaque_type));
         }
