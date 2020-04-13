@@ -21,7 +21,6 @@
 //!
 //!```
 
-
 #![allow(unused_must_use)]
 #![allow(unused_variables)]
 
@@ -51,7 +50,7 @@ pub fn genfut<T: AsRef<str>, P: AsRef<Path>>(name: T, futhark_file: P) {
     if let Err(e) = create_dir(out_dir) {
         println!("Error creating dir ({})", e);
     }
-    #[cfg(not(feature = "no-futhark"))]
+    #[cfg(not(feature = "no_futhark"))]
     {
         let mut futhark_cmd = Command::new("futhark");
         futhark_cmd.arg("pkg").arg("sync");

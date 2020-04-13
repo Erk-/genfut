@@ -1,0 +1,10 @@
+[package]
+name = "matmul_codegen"
+version = "0.1.0"
+
+[dependencies]
+genfut = { path= "..", default-features=false, features=["sequential_c"] }
+
+[[bin]]
+name="codegen"
+path="codegen.rs"

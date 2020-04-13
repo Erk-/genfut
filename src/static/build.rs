@@ -1,18 +1,12 @@
 extern crate bindgen;
 extern crate cc;
 
+use std::env;
 use std::path::PathBuf;
 use std::process::Command;
 
 fn main() {
     // Sequential C support
-    #[cfg(feature = "sequential_c")]
-    let _ = Command::new("futhark")
-        .arg("c")
-        .arg("--library")
-        .arg("./lib/a.fut")
-        .output()
-        .expect("failed to execute process");
     #[cfg(feature = "sequential_c")]
     let bindings = bindgen::Builder::default()
         .header("./lib/a.h")
@@ -27,13 +21,6 @@ fn main() {
         .compile("a");
 
     // CUDA support
-    #[cfg(feature = "cuda")]
-    let _ = Command::new("futhark")
-        .arg("cuda")
-        .arg("--library")
-        .arg("./lib/a.fut")
-        .output()
-        .expect("failed to execute process");
     #[cfg(feature = "cuda")]
     let bindings = bindgen::Builder::default()
         .header("./lib/a.h")
@@ -58,14 +45,8 @@ fn main() {
     }
 
     // OpenCL support
-    #[cfg(feature = "opencl")]
-    let _ = Command::new("futhark")
-        .arg("opencl")
-        .arg("--library")
-        .arg("./lib/a.fut")
-        .output()
-        .expect("failed to execute process");
-    #[cfg(feature = "opencl")]
+    // FIXME: bindgen can't find OpenCL/cl.h on macos.
+    #[cfg(all(feature = "opencl", not(target_os = "macos")))]
     let bindings = bindgen::Builder::default()
         .header("./lib/a.h")
         .generate()
@@ -94,7 +75,7 @@ fn main() {
         }
     }
 
-    let out_path = PathBuf::from("./src/");
+    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
     bindings
         .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");
