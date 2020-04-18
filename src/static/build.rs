@@ -46,7 +46,11 @@ fn main() {
 
     // OpenCL support
     // FIXME: bindgen can't find OpenCL/cl.h on macos.
-    #[cfg(all(feature = "opencl", not(target_os = "macos")))]
+
+    #[cfg(all(feature = "opencl", target_os = "macos"))]
+    println!("cargo:rustc-link-lib=framework=OpenCL");
+
+    #[cfg(feature = "opencl")]
     let bindings = bindgen::Builder::default()
         .header("./lib/a.h")
         .generate()
@@ -75,11 +79,8 @@ fn main() {
         }
     }
 
-    #[cfg(not(all(feature = "opencl", target_os = "macos")))]
-    {
-        let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
-        bindings
-            .write_to_file(out_path.join("bindings.rs"))
-            .expect("Couldn't write bindings!");
-    }
+    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+    bindings
+        .write_to_file(out_path.join("bindings.rs"))
+        .expect("Couldn't write bindings!");
 }

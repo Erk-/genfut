@@ -3,7 +3,7 @@ use std::io::{self, Write};
 use std::path::PathBuf;
 use std::process::Command;
 
-#[cfg(feature = "no_futhark")]
+#[cfg(not(any(feature = "opencl", feature = "cuda", feature = "sequential_c")))]
 pub(crate) fn gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {}
 
 #[cfg(feature = "sequential_c")]

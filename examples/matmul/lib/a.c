@@ -1,3 +1,70 @@
+/*
+ * Headers
+*/
+
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+
+
+/*
+ * Initialisation
+*/
+
+struct futhark_context_config ;
+struct futhark_context_config *futhark_context_config_new(void);
+void futhark_context_config_free(struct futhark_context_config *cfg);
+void futhark_context_config_set_debugging(struct futhark_context_config *cfg,
+                                          int flag);
+void futhark_context_config_set_logging(struct futhark_context_config *cfg,
+                                        int flag);
+struct futhark_context ;
+struct futhark_context *futhark_context_new(struct futhark_context_config *cfg);
+void futhark_context_free(struct futhark_context *ctx);
+int futhark_context_sync(struct futhark_context *ctx);
+char *futhark_context_get_error(struct futhark_context *ctx);
+void futhark_context_pause_profiling(struct futhark_context *ctx);
+void futhark_context_unpause_profiling(struct futhark_context *ctx);
+
+/*
+ * Arrays
+*/
+
+struct futhark_i32_2d ;
+struct futhark_i32_2d *futhark_new_i32_2d(struct futhark_context *ctx,
+                                          int32_t *data, int64_t dim0,
+                                          int64_t dim1);
+struct futhark_i32_2d *futhark_new_raw_i32_2d(struct futhark_context *ctx,
+                                              char *data, int offset,
+                                              int64_t dim0, int64_t dim1);
+int futhark_free_i32_2d(struct futhark_context *ctx,
+                        struct futhark_i32_2d *arr);
+int futhark_values_i32_2d(struct futhark_context *ctx,
+                          struct futhark_i32_2d *arr, int32_t *data);
+char *futhark_values_raw_i32_2d(struct futhark_context *ctx,
+                                struct futhark_i32_2d *arr);
+int64_t *futhark_shape_i32_2d(struct futhark_context *ctx,
+                              struct futhark_i32_2d *arr);
+
+/*
+ * Opaque values
+*/
+
+
+/*
+ * Entry points
+*/
+
+int futhark_entry_matmul(struct futhark_context *ctx,
+                         struct futhark_i32_2d **out0, const
+                         struct futhark_i32_2d *in0, const
+                         struct futhark_i32_2d *in1);
+
+/*
+ * Miscellaneous
+*/
+
+void futhark_debugging_report(struct futhark_context *ctx);
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -1430,6 +1497,8 @@ static inline double futrts_mad64(double a, double b, double c)
     return a * b + c;
 }
 #endif
+int init_constants(struct futhark_context *);
+int free_constants(struct futhark_context *);
 struct memblock {
     int *references;
     char *mem;
@@ -1473,6 +1542,7 @@ struct futhark_context {
     char *error;
     int64_t peak_mem_usage_default;
     int64_t cur_mem_usage_default;
+    struct { } constants;
 } ;
 struct futhark_context *futhark_context_new(struct futhark_context_config *cfg)
 {
@@ -1483,14 +1553,17 @@ struct futhark_context *futhark_context_new(struct futhark_context_config *cfg)
         return NULL;
     ctx->detail_memory = cfg->debugging;
     ctx->debugging = cfg->debugging;
+    ctx->profiling = cfg->debugging;
     ctx->error = NULL;
     create_lock(&ctx->lock);
     ctx->peak_mem_usage_default = 0;
     ctx->cur_mem_usage_default = 0;
+    init_constants(ctx);
     return ctx;
 }
 void futhark_context_free(struct futhark_context *ctx)
 {
+    free_constants(ctx);
     free_lock(&ctx->lock);
     free(ctx);
 }
@@ -1576,12 +1649,20 @@ static int memblock_set(struct futhark_context *ctx, struct memblock *lhs,
     return ret;
 }
 static int futrts_matmul(struct futhark_context *ctx,
-                         struct memblock *out_mem_p_5145,
-                         int32_t *out_out_arrsizze_5146,
-                         int32_t *out_out_arrsizze_5147,
-                         struct memblock xss_mem_5120,
-                         struct memblock yss_mem_5121, int32_t n_5080,
-                         int32_t p_5081, int32_t p_5082, int32_t m_5083);
+                         struct memblock *out_mem_p_5000,
+                         int32_t *out_out_arrsizze_5001,
+                         int32_t *out_out_arrsizze_5002,
+                         struct memblock xss_mem_4975,
+                         struct memblock yss_mem_4976, int32_t n_4935,
+                         int32_t p_4936, int32_t p_4937, int32_t m_4938);
+int init_constants(struct futhark_context *ctx)
+{
+    return 0;
+}
+int free_constants(struct futhark_context *ctx)
+{
+    return 0;
+}
 void futhark_debugging_report(struct futhark_context *ctx)
 {
     if (ctx->detail_memory || ctx->profiling) {
@@ -1591,77 +1672,77 @@ void futhark_debugging_report(struct futhark_context *ctx)
     if (ctx->profiling) { }
 }
 static int futrts_matmul(struct futhark_context *ctx,
-                         struct memblock *out_mem_p_5145,
-                         int32_t *out_out_arrsizze_5146,
-                         int32_t *out_out_arrsizze_5147,
-                         struct memblock xss_mem_5120,
-                         struct memblock yss_mem_5121, int32_t n_5080,
-                         int32_t p_5081, int32_t p_5082, int32_t m_5083)
+                         struct memblock *out_mem_p_5000,
+                         int32_t *out_out_arrsizze_5001,
+                         int32_t *out_out_arrsizze_5002,
+                         struct memblock xss_mem_4975,
+                         struct memblock yss_mem_4976, int32_t n_4935,
+                         int32_t p_4936, int32_t p_4937, int32_t m_4938)
 {
-    struct memblock out_mem_5139;
+    struct memblock out_mem_4994;
     
-    out_mem_5139.references = NULL;
+    out_mem_4994.references = NULL;
     
-    int32_t out_arrsizze_5140;
-    int32_t out_arrsizze_5141;
-    bool dim_match_5086 = p_5081 == p_5082;
-    bool empty_or_match_cert_5087;
+    int32_t out_arrsizze_4995;
+    int32_t out_arrsizze_4996;
+    bool dim_match_4941 = p_4936 == p_4937;
+    bool empty_or_match_cert_4942;
     
-    if (!dim_match_5086) {
+    if (!dim_match_4941) {
         ctx->error = msgprintf("Error: %s\n\nBacktrace:\n%s",
                                "function arguments of wrong shape",
                                "-> #0  matmul.fut:4:1-5:53\n");
-        if (memblock_unref(ctx, &out_mem_5139, "out_mem_5139") != 0)
+        if (memblock_unref(ctx, &out_mem_4994, "out_mem_4994") != 0)
             return 1;
         return 1;
     }
     
-    int64_t binop_x_5123 = sext_i32_i64(n_5080);
-    int64_t binop_y_5124 = sext_i32_i64(m_5083);
-    int64_t binop_x_5125 = mul64(binop_x_5123, binop_y_5124);
-    int64_t bytes_5122 = mul64(4, binop_x_5125);
-    struct memblock mem_5126;
+    int64_t binop_x_4978 = sext_i32_i64(n_4935);
+    int64_t binop_y_4979 = sext_i32_i64(m_4938);
+    int64_t binop_x_4980 = mul64(binop_x_4978, binop_y_4979);
+    int64_t bytes_4977 = mul64(4, binop_x_4980);
+    struct memblock mem_4981;
     
-    mem_5126.references = NULL;
-    if (memblock_alloc(ctx, &mem_5126, bytes_5122, "mem_5126"))
+    mem_4981.references = NULL;
+    if (memblock_alloc(ctx, &mem_4981, bytes_4977, "mem_4981"))
         return 1;
-    for (int32_t i_5109 = 0; i_5109 < n_5080; i_5109++) {
-        for (int32_t i_5105 = 0; i_5105 < m_5083; i_5105++) {
-            int32_t res_5094;
-            int32_t redout_5101 = 0;
+    for (int32_t i_4964 = 0; i_4964 < n_4935; i_4964++) {
+        for (int32_t i_4960 = 0; i_4960 < m_4938; i_4960++) {
+            int32_t res_4949;
+            int32_t redout_4956 = 0;
             
-            for (int32_t i_5102 = 0; i_5102 < p_5081; i_5102++) {
-                int32_t x_5098 =
-                        ((int32_t *) xss_mem_5120.mem)[add32(mul32(i_5109,
-                                                                   p_5081),
-                                                             i_5102)];
-                int32_t x_5099 =
-                        ((int32_t *) yss_mem_5121.mem)[add32(mul32(i_5102,
-                                                                   m_5083),
-                                                             i_5105)];
-                int32_t res_5100 = mul32(x_5098, x_5099);
-                int32_t res_5097 = add32(res_5100, redout_5101);
-                int32_t redout_tmp_5144 = res_5097;
+            for (int32_t i_4957 = 0; i_4957 < p_4936; i_4957++) {
+                int32_t x_4953 =
+                        ((int32_t *) xss_mem_4975.mem)[add32(mul32(i_4964,
+                                                                   p_4936),
+                                                             i_4957)];
+                int32_t x_4954 =
+                        ((int32_t *) yss_mem_4976.mem)[add32(mul32(i_4957,
+                                                                   m_4938),
+                                                             i_4960)];
+                int32_t res_4955 = mul32(x_4953, x_4954);
+                int32_t res_4952 = add32(res_4955, redout_4956);
+                int32_t redout_tmp_4999 = res_4952;
                 
-                redout_5101 = redout_tmp_5144;
+                redout_4956 = redout_tmp_4999;
             }
-            res_5094 = redout_5101;
-            ((int32_t *) mem_5126.mem)[add32(mul32(i_5109, m_5083), i_5105)] =
-                res_5094;
+            res_4949 = redout_4956;
+            ((int32_t *) mem_4981.mem)[add32(mul32(i_4964, m_4938), i_4960)] =
+                res_4949;
         }
     }
-    out_arrsizze_5140 = n_5080;
-    out_arrsizze_5141 = m_5083;
-    if (memblock_set(ctx, &out_mem_5139, &mem_5126, "mem_5126") != 0)
+    out_arrsizze_4995 = n_4935;
+    out_arrsizze_4996 = m_4938;
+    if (memblock_set(ctx, &out_mem_4994, &mem_4981, "mem_4981") != 0)
         return 1;
-    (*out_mem_p_5145).references = NULL;
-    if (memblock_set(ctx, &*out_mem_p_5145, &out_mem_5139, "out_mem_5139") != 0)
+    (*out_mem_p_5000).references = NULL;
+    if (memblock_set(ctx, &*out_mem_p_5000, &out_mem_4994, "out_mem_4994") != 0)
         return 1;
-    *out_out_arrsizze_5146 = out_arrsizze_5140;
-    *out_out_arrsizze_5147 = out_arrsizze_5141;
-    if (memblock_unref(ctx, &mem_5126, "mem_5126") != 0)
+    *out_out_arrsizze_5001 = out_arrsizze_4995;
+    *out_out_arrsizze_5002 = out_arrsizze_4996;
+    if (memblock_unref(ctx, &mem_4981, "mem_4981") != 0)
         return 1;
-    if (memblock_unref(ctx, &out_mem_5139, "out_mem_5139") != 0)
+    if (memblock_unref(ctx, &out_mem_4994, "out_mem_4994") != 0)
         return 1;
     return 0;
 }
@@ -1749,44 +1830,44 @@ int futhark_entry_matmul(struct futhark_context *ctx,
                          struct futhark_i32_2d *in0, const
                          struct futhark_i32_2d *in1)
 {
-    struct memblock xss_mem_5120;
+    struct memblock xss_mem_4975;
     
-    xss_mem_5120.references = NULL;
+    xss_mem_4975.references = NULL;
     
-    struct memblock yss_mem_5121;
+    struct memblock yss_mem_4976;
     
-    yss_mem_5121.references = NULL;
+    yss_mem_4976.references = NULL;
     
-    int32_t n_5080;
-    int32_t p_5081;
-    int32_t p_5082;
-    int32_t m_5083;
-    struct memblock out_mem_5139;
+    int32_t n_4935;
+    int32_t p_4936;
+    int32_t p_4937;
+    int32_t m_4938;
+    struct memblock out_mem_4994;
     
-    out_mem_5139.references = NULL;
+    out_mem_4994.references = NULL;
     
-    int32_t out_arrsizze_5140;
-    int32_t out_arrsizze_5141;
+    int32_t out_arrsizze_4995;
+    int32_t out_arrsizze_4996;
     
     lock_lock(&ctx->lock);
-    xss_mem_5120 = in0->mem;
-    n_5080 = in0->shape[0];
-    p_5081 = in0->shape[1];
-    yss_mem_5121 = in1->mem;
-    p_5082 = in1->shape[0];
-    m_5083 = in1->shape[1];
+    xss_mem_4975 = in0->mem;
+    n_4935 = in0->shape[0];
+    p_4936 = in0->shape[1];
+    yss_mem_4976 = in1->mem;
+    p_4937 = in1->shape[0];
+    m_4938 = in1->shape[1];
     
-    int ret = futrts_matmul(ctx, &out_mem_5139, &out_arrsizze_5140,
-                            &out_arrsizze_5141, xss_mem_5120, yss_mem_5121,
-                            n_5080, p_5081, p_5082, m_5083);
+    int ret = futrts_matmul(ctx, &out_mem_4994, &out_arrsizze_4995,
+                            &out_arrsizze_4996, xss_mem_4975, yss_mem_4976,
+                            n_4935, p_4936, p_4937, m_4938);
     
     if (ret == 0) {
         assert((*out0 =
                 (struct futhark_i32_2d *) malloc(sizeof(struct futhark_i32_2d))) !=
             NULL);
-        (*out0)->mem = out_mem_5139;
-        (*out0)->shape[0] = out_arrsizze_5140;
-        (*out0)->shape[1] = out_arrsizze_5141;
+        (*out0)->mem = out_mem_4994;
+        (*out0)->shape[0] = out_arrsizze_4995;
+        (*out0)->shape[1] = out_arrsizze_4996;
     }
     lock_unlock(&ctx->lock);
     return ret;
