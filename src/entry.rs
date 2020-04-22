@@ -66,11 +66,17 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String, Vec<String>) {
     write!(&mut buffer, "(&mut self, ");
     for (i, (argtype, argname)) in arg_pairs.iter().enumerate() {
         if argname.starts_with("in") {
+            let argtype_string = type_translation(String::from(argtype.clone()));
             write!(
                 &mut buffer,
-                "{}: {}, ",
+                "{}: {}{}, ",
                 argname,
-                type_translation(String::from(argtype.clone()))
+                if argtype_string.starts_with("FutharkOpaque") {
+                    "&"
+                } else {
+                    ""
+                },
+                argtype_string
             );
         }
     }
