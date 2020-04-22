@@ -21,7 +21,6 @@
 //!
 //!```
 
-
 #![allow(unused_must_use)]
 #![allow(unused_variables)]
 
@@ -51,7 +50,7 @@ pub fn genfut<T: AsRef<str>, P: AsRef<Path>>(name: T, futhark_file: P) {
     if let Err(e) = create_dir(out_dir) {
         println!("Error creating dir ({})", e);
     }
-    #[cfg(not(feature = "no-futhark"))]
+    #[cfg(not(feature = "no_futhark"))]
     {
         let mut futhark_cmd = Command::new("futhark");
         futhark_cmd.arg("pkg").arg("sync");
@@ -67,16 +66,19 @@ pub fn genfut<T: AsRef<str>, P: AsRef<Path>>(name: T, futhark_file: P) {
         println!("Error copying file: {}", e);
     }
 
-    // Generate bindings
-    let src_dir = PathBuf::from(out_dir).join("src");
-    if let Err(e) = create_dir(&src_dir) {
-        println!("Error creating dir {:#?}, ({})", src_dir, e);
-    }
+    #[cfg(not(all(feature = "opencl", target_os = "macos")))]
+    {
+        // Generate bindings
+        let src_dir = PathBuf::from(out_dir).join("src");
+        if let Err(e) = create_dir(&src_dir) {
+            println!("Error creating dir {:#?}, ({})", src_dir, e);
+        }
 
-    generate_bindings(
-        &PathBuf::from(out_dir).join("lib/a.h"),
-        &PathBuf::from(out_dir).join("src"),
-    );
+        generate_bindings(
+            &PathBuf::from(out_dir).join("lib/a.h"),
+            &PathBuf::from(out_dir).join("src"),
+        );
+    }
 
     let headers = std::fs::read_to_string(PathBuf::from(out_dir).join("lib/a.h"))
         .expect("Could not read headers");

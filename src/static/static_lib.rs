@@ -1,23 +1,24 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
+#![allow(unused_parens)]
 #![allow(unused_variables)]
 #![allow(dead_code)]
 #![allow(improper_ctypes)]
 #![allow(unused_imports)]
 
-mod bindings;
-mod traits;
-mod context;
 mod arrays;
+mod bindings;
+mod context;
+mod traits;
 
 use std::ffi::CStr;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::os::raw::c_char;
 use std::result::Result as StdResult;
 
-use crate::traits::*;
 pub use crate::arrays::*;
+use crate::traits::*;
 pub use context::FutharkContext;
 
 #[derive(Debug)]
@@ -41,11 +42,9 @@ pub struct FutharkError {
 
 impl FutharkError {
     pub(crate) fn new(ctx: *mut bindings::futhark_context) -> Self {
-        unsafe {
-            Self::_new(bindings::futhark_context_get_error(ctx))
-        }
+        unsafe { Self::_new(bindings::futhark_context_get_error(ctx)) }
     }
-    
+
     pub(crate) fn _new(err: *mut ::std::os::raw::c_char) -> Self {
         unsafe {
             Self {
@@ -60,4 +59,3 @@ impl Display for FutharkError {
         write!(f, "{}", self.error)
     }
 }
-

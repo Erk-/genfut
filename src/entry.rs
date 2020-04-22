@@ -66,11 +66,17 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String, Vec<String>) {
     write!(&mut buffer, "(&mut self, ");
     for (i, (argtype, argname)) in arg_pairs.iter().enumerate() {
         if argname.starts_with("in") {
+            let argtype_string = type_translation(String::from(argtype.clone()));
             write!(
                 &mut buffer,
-                "{}: {}, ",
+                "{}: {}{}, ",
                 argname,
-                type_translation(String::from(argtype.clone()))
+                if argtype_string.starts_with("FutharkOpaque") {
+                    "&"
+                } else {
+                    ""
+                },
+                argtype_string
             );
         }
     }
@@ -174,7 +180,7 @@ return Err(FutharkError::new(ctx).into());}}"
     let mut opaque_types = Vec::new();
     // OUTPUT
     let mut result_counter = 0;
-    write!(&mut buffer2, "Ok(");
+    write!(&mut buffer2, "Ok((");
     for (i, (argtype, argname)) in arg_pairs.iter().enumerate() {
         if argname.starts_with("out") {
             if !parse_array_type(argtype).is_some() {
@@ -196,7 +202,7 @@ return Err(FutharkError::new(ctx).into());}}"
             }
         }
     }
-    write!(&mut buffer2, ")\n}}");
+    write!(&mut buffer2, "))\n}}");
 
     (buffer, buffer2, opaque_types)
 }

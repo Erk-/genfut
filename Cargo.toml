@@ -24,3 +24,4 @@ sequential_c = []
 cuda = []
 opencl = []
 no_futhark = []
+
