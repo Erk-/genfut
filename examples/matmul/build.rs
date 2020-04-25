@@ -3,7 +3,6 @@ extern crate cc;
 
 use std::env;
 use std::path::PathBuf;
-use std::process::Command;
 
 fn main() {
     // Sequential C support
@@ -50,7 +49,7 @@ fn main() {
     #[cfg(all(feature = "opencl", target_os = "macos"))]
     println!("cargo:rustc-link-lib=framework=OpenCL");
 
-    #[cfg(feature = "opencl")]
+    #[cfg(all(feature = "opencl", not(target_os = "macos")))]
     let bindings = bindgen::Builder::default()
         .header("./lib/a.h")
         .generate()
@@ -80,6 +79,7 @@ fn main() {
     }
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+    #[cfg(not(all(feature = "opencl", target_os = "macos")))]
     bindings
         .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");
