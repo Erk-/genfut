@@ -1,8 +1,10 @@
 [package]
 name = "matmul"
+description = "Futhark matrix multiplication example"
 version = "0.1.0"
 authors = ["Name <name@example.com>"]
 edition = "2018"
+license = "YOLO"
 
 [dependencies]
 

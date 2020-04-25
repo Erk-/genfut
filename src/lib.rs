@@ -30,6 +30,7 @@ use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
+use structopt::StructOpt;
 
 use regex::Regex;
 
@@ -40,10 +41,44 @@ use crate::arrays::gen_impl_futhark_types;
 use crate::entry::*;
 use crate::genc::*;
 
-pub fn genfut<T: AsRef<str>, P: AsRef<Path>>(name: T, futhark_file: P) {
-    let name = name.as_ref();
-    let futhark_file = futhark_file.as_ref();
-    let out_dir_str = format!("./{}", name);
+#[derive(StructOpt, Debug)]
+#[structopt(
+    name = "genfut",
+    about = "Generates rust code to interface with generated futhark code."
+)]
+pub struct Opt {
+    /// Output dir
+    #[structopt(name = "NAME")]
+    pub name: String,
+
+    /// File to process
+    #[structopt(name = "FILE", parse(from_os_str))]
+    pub file: PathBuf,
+
+    /// License
+    #[structopt(name = "LICENSE", default_value = "MIT")]
+    pub license: String,
+
+    /// Author
+    #[structopt(name = "AUTHOR", default_value = "Name <name@example.com>")]
+    pub author: String,
+
+    /// Version
+    #[structopt(name = "VERSION", default_value = "0.1.0")]
+    pub version: String,
+
+    /// Description
+    #[structopt(
+        name = "DESCRIPTION",
+        default_value = "Rust interface to Futhark library"
+    )]
+    pub description: String,
+}
+
+pub fn genfut(opt: Opt) {
+    let name = opt.name;
+    let futhark_file = &opt.file;
+    let out_dir_str: String = format!("./{}", name);
     let out_dir = Path::new(&out_dir_str);
 
     // Create dir
@@ -98,7 +133,14 @@ pub fn genfut<T: AsRef<str>, P: AsRef<Path>>(name: T, futhark_file: P) {
     write!(&mut build_file, "{}", static_build);
 
     // Cargo.toml
-    let static_cargo = format!(include_str!("static/static_cargo.toml"), libname = name);
+    let static_cargo = format!(
+        include_str!("static/static_cargo.toml"),
+        libname = name,
+        description = &opt.description,
+        author = &opt.author,
+        version = &opt.version,
+        license = &opt.license,
+    );
     let mut cargo_file =
         File::create(PathBuf::from(out_dir).join("Cargo.toml")).expect("File creation failed!");
     write!(&mut cargo_file, "{}", static_cargo);

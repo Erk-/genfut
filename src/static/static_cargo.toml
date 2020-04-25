@@ -1,8 +1,10 @@
 [package]
 name = "{libname}"
-version = "0.1.0"
-authors = ["Name <name@example.com>"]
+description = "{description}"
+version = "{version}"
+authors = ["{author}"]
 edition = "2018"
+license = "{license}"
 
 [dependencies]
 
