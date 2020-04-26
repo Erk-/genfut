@@ -17,11 +17,9 @@ Inflector = "0.11.4"
 regex = "1"
 structopt = "0.3.2"
 
-
 [features]
 default = ["sequential_c"]
 sequential_c = []
 cuda = []
 opencl = []
 no_futhark = []
-
