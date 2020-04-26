@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.4
+
+Supply more Cargo fields, and don't break when building OpenCL lib on MacOS ([#5](https://github.com/Erk-/genfut/pull/5))
+
 ## 0.1.3
 
 Remove unused import. ([#4](https://github.com/Erk-/genfut/pull/4))
