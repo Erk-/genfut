@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.5
+
+
+- Implement Sync and Send for FutharkContex.
+- Never run bindgen at build time.
+- Make bindings module public.
+([#6)](https://github.com/Erk-/genfut/pull/6))
+
 ## 0.1.4
 
 Supply more Cargo fields, and don't break when building OpenCL lib on MacOS ([#5](https://github.com/Erk-/genfut/pull/5))
