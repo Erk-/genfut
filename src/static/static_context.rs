@@ -6,6 +6,10 @@ pub struct FutharkContext {
     config: *mut bindings::futhark_context_config,
 }
 
+// Safe to implement because Futhark has internal synchronization.
+unsafe impl Sync for FutharkContext {}
+unsafe impl Send for FutharkContext {}
+
 impl FutharkContext {
     pub fn new() -> Self {
         unsafe {

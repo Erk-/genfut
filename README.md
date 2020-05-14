@@ -9,6 +9,8 @@ This is a tool to generate a Rust library to interact with exported functions fr
 genfut <Rust lib name> <futhark_file.fut>
 ```
 
+### Note that use of `bindings` module may not be generally portable. Use with caution.
+
 ### As a library
 
 `build.rs`

@@ -8,7 +8,7 @@
 #![allow(unused_imports)]
 
 mod arrays;
-mod bindings;
+pub mod bindings;
 mod context;
 mod traits;
 
