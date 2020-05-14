@@ -8,7 +8,7 @@
 #![allow(unused_imports)]
 
 mod arrays;
-mod bindings;
+pub mod bindings;
 mod context;
 mod traits;
 
@@ -61,21 +61,20 @@ impl Display for FutharkError {
 }
 
 impl FutharkContext {
-pub fn matmul(&mut self, in0: Array_i32_2d, in1: Array_i32_2d, ) -> Result<(Array_i32_2d)>
-{
-let ctx = self.ptr();
-unsafe{
-_matmul(ctx, in0.as_raw_mut(), in1.as_raw_mut(), )
-}}
-
+    pub fn matmul(&mut self, in0: Array_i32_2d, in1: Array_i32_2d) -> Result<(Array_i32_2d)> {
+        let ctx = self.ptr();
+        unsafe { _matmul(ctx, in0.as_raw_mut(), in1.as_raw_mut()) }
+    }
 }
-unsafe fn _matmul(ctx: *mut bindings::futhark_context, in0: *const bindings::futhark_i32_2d, in1: *const bindings::futhark_i32_2d, ) -> Result<(Array_i32_2d)> {
-let mut raw_out0 = std::ptr::null_mut();
+unsafe fn _matmul(
+    ctx: *mut bindings::futhark_context,
+    in0: *const bindings::futhark_i32_2d,
+    in1: *const bindings::futhark_i32_2d,
+) -> Result<(Array_i32_2d)> {
+    let mut raw_out0 = std::ptr::null_mut();
 
-if bindings::futhark_entry_matmul(ctx, &mut raw_out0, in0, in1, ) != 0 {
-return Err(FutharkError::new(ctx).into());}
-Ok((Array_i32_2d::from_ptr(ctx, raw_out0)
-))
+    if bindings::futhark_entry_matmul(ctx, &mut raw_out0, in0, in1) != 0 {
+        return Err(FutharkError::new(ctx).into());
+    }
+    Ok((Array_i32_2d::from_ptr(ctx, raw_out0)))
 }
-
-

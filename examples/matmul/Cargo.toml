@@ -9,7 +9,6 @@ license = "YOLO"
 [dependencies]
 
 [build-dependencies]
-bindgen = "0.51.0"
 cc = "1.0"
 
 [features]
