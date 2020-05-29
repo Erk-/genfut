@@ -1,7 +1,12 @@
 # Changelog
 
-## 0.1.5
+## 0.1.6
 
+- Remove unused imports.
+- Expose context fields.
+([#7)](https://github.com/Erk-/genfut/pull/7))
+
+## 0.1.5
 
 - Implement Sync and Send for FutharkContex.
 - Never run bindgen at build time.
