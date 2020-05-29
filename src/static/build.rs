@@ -1,8 +1,5 @@
 extern crate cc;
 
-use std::env;
-use std::path::PathBuf;
-
 fn main() {
     // Sequential C support
     #[cfg(feature = "sequential_c")]
