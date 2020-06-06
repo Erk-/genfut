@@ -26,7 +26,7 @@ impl {array_type} {{
         T: Into<*mut bindings::futhark_context>,
     {{
         let ctx = ctx.into();
-        let shape_ptr: *mut i64 = {futhark_type}::shape(ctx, ptr);
+        let shape_ptr: *const i64 = {futhark_type}::shape(ctx, ptr);
         let shape = std::slice::from_raw_parts(shape_ptr, {dim});
         Vec::from(shape)
     }}

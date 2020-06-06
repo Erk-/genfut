@@ -53,7 +53,7 @@ impl FutharkType for futhark_{rust_type}_{dim}d {{
    type RustType = {rust_type};
    const DIM: usize = {dim};
 
-    unsafe fn shape<C>(ctx: C, ptr: *const bindings::futhark_{rust_type}_{dim}d) -> *mut i64
+    unsafe fn shape<C>(ctx: C, ptr: *const bindings::futhark_{rust_type}_{dim}d) -> *const i64
     where C: Into<*mut bindings::futhark_context>
     {{
         let ctx = ctx.into();
