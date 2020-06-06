@@ -1,4 +1,4 @@
-use std::fs::create_dir;
+use std::fs::create_dir_all;
 use std::io::{self, Write};
 use std::path::PathBuf;
 use std::process::Command;
@@ -9,8 +9,10 @@ pub(crate) fn gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {}
 #[cfg(feature = "sequential_c")]
 pub(crate) fn gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {
     let out_path = PathBuf::from(out_dir);
-    if let Err(e) = create_dir(out_path.join("lib")) {
-        println!("Error creating dir ({})", e);
+    let lib_dir = out_path.join("lib");
+    if let Err(e) = create_dir_all(lib_dir.clone()) {
+        eprintln!("Error creating {} ({})", lib_dir.display(), e);
+        std::process::exit(1);
     }
     let output = Command::new("futhark")
         .arg("c")
@@ -30,8 +32,10 @@ pub(crate) fn gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {
 #[cfg(feature = "cuda")]
 pub(crate) fn gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {
     let out_path = PathBuf::from(out_dir);
-    if let Err(e) = create_dir(out_path.join("lib")) {
-        println!("Error creating dir ({})", e);
+    let lib_dir = out_path.join("lib");
+    if let Err(e) = create_dir_all(lib_dir.clone()) {
+        eprintln!("Error creating {} ({})", lib_dir.display(), e);
+        std::process::exit(1);
     }
     let output = Command::new("futhark")
         .arg("cuda")
@@ -51,8 +55,10 @@ pub(crate) fn gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {
 #[cfg(feature = "opencl")]
 pub(crate) fn gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {
     let out_path = PathBuf::from(out_dir);
-    if let Err(e) = create_dir(out_path.join("lib")) {
-        println!("Error creating dir ({})", e);
+    let lib_dir = out_path.join("lib");
+    if let Err(e) = create_dir_all(lib_dir.clone()) {
+        eprintln!("Error creating {} ({})", lib_dir.display(), e);
+        std::process::exit(1);
     }
     let output = Command::new("futhark")
         .arg("opencl")
