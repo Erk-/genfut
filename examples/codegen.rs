@@ -1,3 +1,5 @@
+//! Binary to generate the matmul library
+
 extern crate genfut;
 use genfut::{genfut, Opt};
 

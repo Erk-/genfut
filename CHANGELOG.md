@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0
+
+- Fix docs and test ([#10)](https://github.com/Erk-/genfut/pull/10))
+- Do not complain if the desired directory already exists. ([#9)](https://github.com/Erk-/genfut/pull/9))
+- Futhark since 0.15.7 now returns const shapes for arrays. ([#8)](https://github.com/Erk-/genfut/pull/8))
+
 ## 0.1.6
 
 - Remove unused imports.
