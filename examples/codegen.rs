@@ -1,8 +1,8 @@
 extern crate genfut;
-use genfut::Opt;
+use genfut::{genfut, Opt};
 
 fn main() {
-    genfut::genfut(Opt {
+    genfut(Opt {
         name: "matmul".to_string(),
         file: std::path::PathBuf::from("matmul.fut"),
         author: "Name <name@example.com>".to_string(),
