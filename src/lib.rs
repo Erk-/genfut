@@ -24,7 +24,7 @@
 #![allow(unused_must_use)]
 #![allow(unused_variables)]
 
-use std::fs::create_dir;
+use std::fs::create_dir_all;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
@@ -81,9 +81,11 @@ pub fn genfut(opt: Opt) {
     let out_dir_str: String = format!("./{}", name);
     let out_dir = Path::new(&out_dir_str);
 
-    // Create dir
-    if let Err(e) = create_dir(out_dir) {
-        println!("Error creating dir ({})", e);
+    // Create with create_dir_all, because we do not want to fail if
+    // the directory already exists.
+    if let Err(e) = create_dir_all(out_dir) {
+        eprintln!("Error creating {:#?} ({})", out_dir, e);
+        std::process::exit(1);
     }
     #[cfg(not(feature = "no_futhark"))]
     {
@@ -98,15 +100,17 @@ pub fn genfut(opt: Opt) {
 
     // copy futhark file
     if let Err(e) = std::fs::copy(futhark_file, PathBuf::from(out_dir).join("lib/a.fut")) {
-        println!("Error copying file: {}", e);
+        eprintln!("Error copying file: {}", e);
+        std::process::exit(1);
     }
 
     #[cfg(not(all(feature = "opencl", target_os = "macos")))]
     {
         // Generate bindings
         let src_dir = PathBuf::from(out_dir).join("src");
-        if let Err(e) = create_dir(&src_dir) {
-            println!("Error creating dir {:#?}, ({})", src_dir, e);
+        if let Err(e) = create_dir_all(&src_dir) {
+            eprintln!("Error creating {:#?}, ({})", src_dir, e);
+            std::process::exit(1);
         }
 
         generate_bindings(
