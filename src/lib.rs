@@ -12,11 +12,18 @@
 //!### As a library
 //!
 //!`build.rs`
-//!```rust
-//!use genfut::genfut;
+//!```rust, no_run
+//!use genfut::{Opt, genfut};
 //!
 //!fn main() {
-//!    genfut("<Rust lib name>", "futhark_file.fut")
+//!    genfut(Opt {
+//!        name: "<Rust lib name>".to_string(),
+//!        file: std::path::PathBuf::from("futhark_file.fut"),
+//!        author: "Name <name@example.com>".to_string(),
+//!        version: "0.1.0".to_string(),
+//!        license: "YOLO".to_string(),
+//!        description: "Futhark example".to_string(),
+//!    })
 //!}
 //!
 //!```
