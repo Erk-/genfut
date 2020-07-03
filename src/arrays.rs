@@ -64,6 +64,8 @@ impl FutharkType for futhark_{rust_type}_{dim}d {{
     {{
         let ctx = ctx.into();
         bindings::futhark_values_{rust_type}_{dim}d(ctx, ptr, dst);
+        // Sync the values to the array.
+        bindings::futhark_context_sync(ctx);
     }}
     unsafe fn free<C>(ctx: C, ptr: *mut Self)
     where C: Into<*mut bindings::futhark_context>
