@@ -99,6 +99,15 @@ pub fn genfut(opt: Opt) {
         let mut futhark_cmd = Command::new("futhark");
         futhark_cmd.arg("pkg").arg("sync");
         let _ = futhark_cmd.output().expect("failed: futhark pkg sync");
+
+        let version_path = PathBuf::from(&out_dir).join("futhark-version.txt");
+        let mut version_file =
+            File::create(version_path).expect("could not create futhark-version.txt");
+        futhark_cmd.arg("--version");
+        let output = futhark_cmd.output().expect("failed: futhark --version");
+        version_file
+            .write_all(&output.stdout)
+            .expect("failed to write Futhark version");
     }
 
     // Generate C code, Though only headerfiles are needed.
