@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1
+
+- Include Futhark version in henerated output ([#12)](https://github.com/Erk-/genfut/pull/12))
+- Sync context after getting values ([#11)](https://github.com/Erk-/genfut/pull/11))
+
 ## 0.2.0
 
 - Fix docs and test ([#10)](https://github.com/Erk-/genfut/pull/10))
