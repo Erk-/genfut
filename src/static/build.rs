@@ -6,6 +6,7 @@ fn main() {
     cc::Build::new()
         .file("./lib/a.c")
         .flag("-fPIC")
+        .flag("-std=c99")
         .shared_flag(true)
         .warnings(false)
         .compile("a");
@@ -17,6 +18,7 @@ fn main() {
         .cuda(true)
         .flag("-Xcompiler")
         .flag("-fPIC")
+        .flag("-std=c99")
         .flag("-w")
         .shared_flag(true)
         .compile("a");
@@ -37,6 +39,7 @@ fn main() {
             cc::Build::new()
                 .file("./lib/a.c")
                 .flag("-fPIC")
+                .flag("-std=c99")
                 .flag("-lOpenCL")
                 .shared_flag(true)
                 .compile("a");
