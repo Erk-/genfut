@@ -58,3 +58,8 @@ fn main() -> Result<(), Error> {
     Ok(())
 }
 ```
+### MacOS
+
+For the time being, due to quirks of the total toolchain, MacOS is unsupported. Generated libraries will build on MacOS
+and do not require that OpenCL be installed. However, calling any of the API functions at runtime may result in an
+error, so users of that library should avoid doing so on MacOS.
