@@ -45,16 +45,5 @@ fn main() {
                 .compile("a");
             println!("cargo:rustc-link-lib=dylib=OpenCL");
         }
-        #[cfg(target_os = "macos")]
-        {
-            cc::Build::new()
-                .file("./lib/a.c")
-                .flag("-fPIC")
-                .flag("-std=c99")
-                .flag("-framework")
-                .flag("OpenCL")
-                .shared_flag(true)
-                .compile("a");
-        }
     }
 }
