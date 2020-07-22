@@ -25,6 +25,13 @@ impl FutharkContext {
     pub(crate) fn ptr(&mut self) -> *mut bindings::futhark_context {
         self.context
     }
+
+    pub fn free(&mut self) {
+        unsafe {
+            bindings::futhark_context_free(self.context);
+            bindings::futhark_context_config_free(self.config);
+        }
+    }
 }
 
 impl From<FutharkContext> for *mut bindings::futhark_context {
