@@ -38,10 +38,9 @@ fn gen_impl_futhark_type(input: &str) -> String {
     write!(&mut buffer,
 r#"
 impl futhark_{rust_type}_{dim}d {{
-   unsafe fn new<C>(ctx: C, arr: &[{rust_type}], dim: &[i64]) -> *const Self
-   where C: Into<*mut bindings::futhark_context>
+   unsafe fn new(ctx: &FutharkContext, arr: &[i32], dim: &[i64]) -> *const Self
    {{
-     let ctx = ctx.into();
+     let ctx = ctx.ptr();
      bindings::futhark_new_{rust_type}_{dim}d(
        ctx,
        arr.as_ptr() as *mut {rust_type},
@@ -53,24 +52,21 @@ impl FutharkType for futhark_{rust_type}_{dim}d {{
    type RustType = {rust_type};
    const DIM: usize = {dim};
 
-    unsafe fn shape<C>(ctx: C, ptr: *const bindings::futhark_{rust_type}_{dim}d) -> *const i64
-    where C: Into<*mut bindings::futhark_context>
+    unsafe fn shape(ctx: &FutharkContext, ptr: *const bindings::futhark_{rust_type}_{dim}d) -> *const i64
     {{
-        let ctx = ctx.into();
+        let ctx = ctx.ptr();
         bindings::futhark_shape_{rust_type}_{dim}d(ctx, ptr as *mut bindings::futhark_{rust_type}_{dim}d)
     }}
-    unsafe fn values<C>(ctx: C, ptr: *mut Self, dst: *mut Self::RustType)
-    where C: Into<*mut bindings::futhark_context>
+    unsafe fn values(ctx: &FutharkContext, ptr: *mut Self, dst: *mut Self::RustType)
     {{
-        let ctx = ctx.into();
+        let ctx = ctx.ptr();
         bindings::futhark_values_{rust_type}_{dim}d(ctx, ptr, dst);
         // Sync the values to the array.
         bindings::futhark_context_sync(ctx);
     }}
-    unsafe fn free<C>(ctx: C, ptr: *mut Self)
-    where C: Into<*mut bindings::futhark_context>
+    unsafe fn free(ctx: &FutharkContext, ptr: *mut Self)
     {{
-        let ctx = ctx.into();
+        let ctx = ctx.ptr();
         bindings::futhark_free_{rust_type}_{dim}d(ctx, ptr);
     }}}}"#, rust_type=captures[1].to_owned(), dim=dim, array_dim=array_dim_expansion(dim)
     ).expect("Write failed!");

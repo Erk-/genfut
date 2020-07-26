@@ -1,18 +1,13 @@
 use crate::bindings;
 use crate::traits::*;
 use crate::{Error, Result};
+use crate::context::FutharkContext;
 
 pub(crate) trait FutharkType {
     type RustType: Default;
     const DIM: usize;
 
-    unsafe fn shape<C>(ctx: C, ptr: *const Self) -> *const i64
-    where
-        C: Into<*mut bindings::futhark_context>;
-    unsafe fn values<C>(ctx: C, ptr: *mut Self, dst: *mut Self::RustType)
-    where
-        C: Into<*mut bindings::futhark_context>;
-    unsafe fn free<C>(ctx: C, ptr: *mut Self)
-    where
-        C: Into<*mut bindings::futhark_context>;
+    unsafe fn shape(ctx: &FutharkContext, ptr: *const Self) -> *const i64;
+    unsafe fn values(ctx: &FutharkContext, ptr: *mut Self, dst: *mut Self::RustType);
+    unsafe fn free(ctx: &FutharkContext, ptr: *mut Self);
 }

@@ -1,6 +1,6 @@
 use crate::bindings;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Debug)]
 pub struct FutharkContext {
     pub context: *mut bindings::futhark_context,
     pub config: *mut bindings::futhark_context_config,
@@ -22,13 +22,24 @@ impl FutharkContext {
         }
     }
 
-    pub(crate) fn ptr(&mut self) -> *mut bindings::futhark_context {
-        self.context
+    pub(crate) fn ptr(&self) -> *mut bindings::futhark_context {
+        unsafe {
+            std::mem::transmute(self.context)
+        }
     }
 }
 
 impl From<FutharkContext> for *mut bindings::futhark_context {
-    fn from(mut ctx: FutharkContext) -> Self {
+    fn from(ctx: FutharkContext) -> Self {
         ctx.ptr()
+    }
+}
+
+impl Drop for FutharkContext {
+    fn drop(&mut self) {
+        unsafe {
+            bindings::futhark_context_free(self.context);
+            bindings::futhark_context_config_free(self.config);
+        }
     }
 }

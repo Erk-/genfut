@@ -63,7 +63,7 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String, Vec<String>) {
     let name = re_name.captures(input).unwrap()[1].to_owned();
     let mut buffer = format!("pub fn {name}", name = name);
 
-    write!(&mut buffer, "(&mut self, ");
+    write!(&mut buffer, "(&self, ");
     for (i, (argtype, argname)) in arg_pairs.iter().enumerate() {
         if argname.starts_with("in") {
             let argtype_string = type_translation(String::from(argtype.clone()));
@@ -101,7 +101,7 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String, Vec<String>) {
 
     write!(
         &mut buffer,
-        "{{\nlet ctx = self.ptr();\nunsafe{{\n_{name}(ctx, ",
+        "{{\nunsafe{{\n_{name}(self, ",
         name = name
     );
     for (i, (argtype, argname)) in arg_pairs.iter().enumerate() {
@@ -119,7 +119,7 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String, Vec<String>) {
     let mut buffer2 = String::new();
     write!(
         &mut buffer2,
-        "unsafe fn _{name}(ctx: *mut bindings::futhark_context, ",
+        "unsafe fn _{name}(ctx: &FutharkContext, ",
         name = name
     );
     for (i, (argtype, argname)) in arg_pairs.iter().enumerate() {
@@ -158,7 +158,7 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String, Vec<String>) {
 
     write!(
         &mut buffer2,
-        "\nif bindings::futhark_entry_{name}(ctx, ",
+        "\nif bindings::futhark_entry_{name}(ctx.ptr(), ",
         name = name
     );
     for (i, (argtype, argname)) in arg_pairs.iter().enumerate() {
@@ -174,7 +174,7 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String, Vec<String>) {
     writeln!(
         &mut buffer2,
         ") != 0 {{
-return Err(FutharkError::new(ctx).into());}}"
+return Err(FutharkError::new(ctx.ptr()).into());}}"
     );
 
     let mut opaque_types = Vec::new();

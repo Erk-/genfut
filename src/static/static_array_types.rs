@@ -1,11 +1,11 @@
 #[derive(Debug)]
-pub struct {array_type} {{
+pub struct {array_type}<'a> {{
     ptr: *const {futhark_type},
-    ctx: *mut bindings::futhark_context,
+    ctx: &'a FutharkContext,
 }}
 
 
-impl {array_type} {{
+impl<'a> {array_type}<'a> {{
     pub(crate) unsafe fn as_raw(&self) -> *const {futhark_type} {{
          self.ptr
     }}
@@ -13,34 +13,25 @@ impl {array_type} {{
     pub(crate) unsafe fn as_raw_mut(&self) -> *mut {futhark_type} {{
          self.ptr as *mut {futhark_type}
     }}
-    pub(crate) unsafe fn from_ptr<T>(ctx: T, ptr: *const {futhark_type}) -> Self
-        where
-        T: Into<*mut bindings::futhark_context>,
+    pub(crate) unsafe fn from_ptr(ctx: &'a FutharkContext, ptr: *const {futhark_type}) -> Self
     {{
-        let ctx = ctx.into();
         Self {{ ptr, ctx }}
     }}
 
-    pub(crate) unsafe fn shape<T>(ctx: T, ptr: *const {futhark_type}) -> Vec<i64>
-    where
-        T: Into<*mut bindings::futhark_context>,
+    pub(crate) unsafe fn shape(ctx: &FutharkContext, ptr: *const {futhark_type}) -> Vec<i64>
     {{
-        let ctx = ctx.into();
         let shape_ptr: *const i64 = {futhark_type}::shape(ctx, ptr);
         let shape = std::slice::from_raw_parts(shape_ptr, {dim});
         Vec::from(shape)
     }}
 
-    pub fn from_vec<T>(ctx: T, arr: &[{inner_type}], dim: &[i64]) -> Result<Self>
-    where
-        T: Into<*mut bindings::futhark_context>,
+    pub fn from_vec(ctx: &'a FutharkContext, arr: &[{inner_type}], dim: &[i64]) -> Result<Self>
     {{
         let expected = (dim.iter().fold(1, |acc, e| acc * e)) as usize;
         if arr.len() != expected {{
             return Err(Error::SizeMismatch(arr.len(), expected));
         }}
 
-        let ctx = ctx.into();
         unsafe {{
             let ptr = {futhark_type}::new(ctx, arr, dim);
             Ok({array_type} {{ ptr, ctx }})
@@ -51,7 +42,7 @@ impl {array_type} {{
     {{
         let ctx = self.ctx;
         unsafe {{
-            futhark_context_sync(ctx);
+            futhark_context_sync(ctx.ptr());
             let shape = Self::shape(ctx, self.as_raw());
             let elems = shape.iter().fold(1, |acc, e| acc * e) as usize;
             let mut buffer: Vec<{inner_type}> =
@@ -67,7 +58,7 @@ impl {array_type} {{
     }}
 }}
 
-impl Drop for {array_type} {{
+impl Drop for {array_type}<'_> {{
     fn drop(&mut self) {{
         unsafe {{
             self.free_array();
