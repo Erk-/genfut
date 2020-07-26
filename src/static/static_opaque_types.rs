@@ -1,9 +1,7 @@
-use crate::context::FutharkContext;
-
 #[derive(Debug)]
 pub struct {opaque_type}<'a> {{
     ptr: *const {futhark_type},
-    ctx: &'a FutharkContext,
+    ctx: &'a crate::context::FutharkContext,
 }}
 
 impl<'a> {opaque_type}<'a> {{
@@ -14,7 +12,7 @@ impl<'a> {opaque_type}<'a> {{
     pub(crate) unsafe fn as_raw_mut(&self) -> *mut {futhark_type} {{
          self.ptr as *mut {futhark_type}
     }}
-    pub(crate) unsafe fn from_ptr(ctx: &FutharkContext, ptr: *const {futhark_type}) -> Self
+    pub(crate) unsafe fn from_ptr(ctx: &'a crate::context::FutharkContext, ptr: *const {futhark_type}) -> Self
     {{
         Self {{ ptr, ctx }}
     }}
@@ -25,7 +23,7 @@ impl<'a> {opaque_type}<'a> {{
     }}
 }}
 
-impl Drop for {opaque_type} {{
+impl Drop for {opaque_type}<'_> {{
     fn drop(&mut self) {{
         unsafe {{
             self.free_opaque();

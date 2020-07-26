@@ -1,7 +1,7 @@
 #[derive(Debug)]
 pub struct {array_type}<'a> {{
     ptr: *const {futhark_type},
-    ctx: &'a FutharkContext,
+    ctx: &'a crate::context::FutharkContext,
 }}
 
 
@@ -13,19 +13,19 @@ impl<'a> {array_type}<'a> {{
     pub(crate) unsafe fn as_raw_mut(&self) -> *mut {futhark_type} {{
          self.ptr as *mut {futhark_type}
     }}
-    pub(crate) unsafe fn from_ptr(ctx: &'a FutharkContext, ptr: *const {futhark_type}) -> Self
+    pub(crate) unsafe fn from_ptr(ctx: &'a crate::context::FutharkContext, ptr: *const {futhark_type}) -> Self
     {{
         Self {{ ptr, ctx }}
     }}
 
-    pub(crate) unsafe fn shape(ctx: &FutharkContext, ptr: *const {futhark_type}) -> Vec<i64>
+    pub(crate) unsafe fn shape(ctx: &crate::context::FutharkContext, ptr: *const {futhark_type}) -> Vec<i64>
     {{
         let shape_ptr: *const i64 = {futhark_type}::shape(ctx, ptr);
         let shape = std::slice::from_raw_parts(shape_ptr, {dim});
         Vec::from(shape)
     }}
 
-    pub fn from_vec(ctx: &'a FutharkContext, arr: &[{inner_type}], dim: &[i64]) -> Result<Self>
+    pub fn from_vec(ctx: &'a crate::context::FutharkContext, arr: &[{inner_type}], dim: &[i64]) -> Result<Self>
     {{
         let expected = (dim.iter().fold(1, |acc, e| acc * e)) as usize;
         if arr.len() != expected {{
