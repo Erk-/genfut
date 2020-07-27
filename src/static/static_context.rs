@@ -1,6 +1,6 @@
 use crate::bindings;
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct FutharkContext {
     pub context: *mut bindings::futhark_context,
     pub config: *mut bindings::futhark_context_config,
