@@ -59,3 +59,18 @@ impl Display for FutharkError {
         write!(f, "{}", self.error)
     }
 }
+
+impl std::error::Error for FutharkError {}
+
+impl Display for Error {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        match self {
+            Error::FutharkError(ferr) => write!(f, "{}", ferr),
+            Error::SizeMismatch(actual, expected) => {
+                write!(f, "Size was: {}, expected: {}.", actual, expected)
+            },
+        }
+    }
+}
+
+impl std::error::Error for Error {}
