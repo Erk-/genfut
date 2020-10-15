@@ -1,4 +1,5 @@
 use crate::bindings;
+use crate::{FutharkError, Result};
 
 #[derive(Clone, Copy)]
 pub struct FutharkContext {
@@ -11,13 +12,20 @@ unsafe impl Sync for FutharkContext {}
 unsafe impl Send for FutharkContext {}
 
 impl FutharkContext {
-    pub fn new() -> Self {
+    pub fn new() -> Result<Self> {
         unsafe {
             let ctx_config = bindings::futhark_context_config_new();
             let ctx = bindings::futhark_context_new(ctx_config);
-            FutharkContext {
-                context: ctx,
-                config: ctx_config,
+
+            let err = bindings::futhark_context_get_error(ctx);
+
+            if err.is_null() {
+                Ok(FutharkContext {
+                    context: ctx,
+                    config: ctx_config,
+                })
+            } else {
+                Err(FutharkError::_new(err).into())
             }
         }
     }
