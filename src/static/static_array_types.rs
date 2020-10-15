@@ -63,10 +63,10 @@ impl {array_type} {{
 
     pub(crate) unsafe fn free_array(&mut self)
     {{
-        if {futhark_type}::free(self.ctx, self.as_raw_mut()) != 0 {
+        if {futhark_type}::free(self.ctx, self.as_raw_mut()) != 0 {{
             panic!("Deallocation of object failed, this should not happen \
                     outside of compiler bugs and driver or hardware malfunction.");
-        }
+        }}
     }}
 }}
 
