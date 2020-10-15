@@ -9,7 +9,7 @@ pub(crate) trait FutharkType {
     unsafe fn shape<C>(ctx: C, ptr: *const Self) -> *const i64
     where
         C: Into<*mut bindings::futhark_context>;
-    unsafe fn values<C>(ctx: C, ptr: *mut Self, dst: *mut Self::RustType)
+    unsafe fn values<C>(ctx: C, ptr: *mut Self, dst: *mut Self::RustType) -> Result<()>
     where
         C: Into<*mut bindings::futhark_context>;
     unsafe fn free<C>(ctx: C, ptr: *mut Self)

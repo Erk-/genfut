@@ -47,7 +47,7 @@ impl {array_type} {{
         }}
     }}
     
-    pub fn to_vec(&self) -> (Vec<{inner_type}>, Vec<i64>)
+    pub fn to_vec(&self) -> Result<(Vec<{inner_type}>, Vec<i64>)>
     {{
         let ctx = self.ctx;
         unsafe {{
@@ -56,8 +56,8 @@ impl {array_type} {{
             let elems = shape.iter().fold(1, |acc, e| acc * e) as usize;
             let mut buffer: Vec<{inner_type}> =
                 vec![{inner_type}::default(); elems];
-            let cint = {futhark_type}::values(ctx, self.as_raw_mut(), buffer.as_mut_ptr());
-            (buffer, shape.to_owned())
+            let cint = {futhark_type}::values(ctx, self.as_raw_mut(), buffer.as_mut_ptr())?;
+            Ok((buffer, shape.to_owned()))
         }}
     }}
 

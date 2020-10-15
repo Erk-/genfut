@@ -59,13 +59,17 @@ impl FutharkType for futhark_{rust_type}_{dim}d {{
         let ctx = ctx.into();
         bindings::futhark_shape_{rust_type}_{dim}d(ctx, ptr as *mut bindings::futhark_{rust_type}_{dim}d)
     }}
-    unsafe fn values<C>(ctx: C, ptr: *mut Self, dst: *mut Self::RustType)
+    unsafe fn values<C>(ctx: C, ptr: *mut Self, dst: *mut Self::RustType) -> Result<()>
     where C: Into<*mut bindings::futhark_context>
     {{
         let ctx = ctx.into();
-        bindings::futhark_values_{rust_type}_{dim}d(ctx, ptr, dst);
+        let ret = bindings::futhark_values_{rust_type}_{dim}d(ctx, ptr, dst);
+        if ret != 0 {{
+            return Err(FutharkError::new(ctx));
+        }} 
         // Sync the values to the array.
         bindings::futhark_context_sync(ctx);
+        Ok(())
     }}
     unsafe fn free<C>(ctx: C, ptr: *mut Self)
     where C: Into<*mut bindings::futhark_context>
