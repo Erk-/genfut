@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0
+
+- Implement std::error::Error for FutharkError and Error ([#26](https://github.com/Erk-/genfut/pull/26))
+- Quote braces in static source. ([#25](https://github.com/Erk-/genfut/pull/25))
+- Add error checking when creating the Context ([#24](https://github.com/Erk-/genfut/pull/24))
+- Panic if freeing fails. ([#21](https://github.com/Erk-/genfut/pull/21))
+- Fix values error ([#22](https://github.com/Erk-/genfut/pull/22))
+
 ## 0.3.0
 
 - Don't compile OpenCL on MacOS (for now). ([#14](https://github.com/Erk-/genfut/pull/14))
@@ -7,7 +15,7 @@
 
 ## 0.2.1
 
-- Include Futhark version in henerated output ([#12](https://github.com/Erk-/genfut/pull/12))
+- Include Futhark version in generated output ([#12](https://github.com/Erk-/genfut/pull/12))
 - Sync context after getting values ([#11](https://github.com/Erk-/genfut/pull/11))
 
 ## 0.2.0
