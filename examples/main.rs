@@ -13,7 +13,7 @@ fn main() -> Result<(), Error> {
 
     let res_arr = ctx.matmul(a_arr, b_arr)?;
 
-    let res = &res_arr.to_vec();
+    let res = &res_arr.to_vec()?;
 
     for i in 0..4 {
         print!("{} ", res.0[i]);
