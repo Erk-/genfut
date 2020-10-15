@@ -22,7 +22,10 @@ impl {opaque_type} {{
 
     pub(crate) unsafe fn free_opaque(&mut self)
     {{
-        bindings::futhark_free_{base_type}(self.ctx, self.as_raw_mut());
+        if bindings::futhark_free_{base_type}(self.ctx, self.as_raw_mut()) != 0 {
+            panic!("Deallocation of object failed, this should not happen \
+                    outside of compiler bugs and driver or hardware malfunction.");
+        }
     }}
 }}
 
