@@ -71,11 +71,11 @@ impl FutharkType for futhark_{rust_type}_{dim}d {{
         bindings::futhark_context_sync(ctx);
         Ok(())
     }}
-    unsafe fn free<C>(ctx: C, ptr: *mut Self)
+    unsafe fn free<C>(ctx: C, ptr: *mut Self) -> ::std::os::raw::c_int
     where C: Into<*mut bindings::futhark_context>
     {{
         let ctx = ctx.into();
-        bindings::futhark_free_{rust_type}_{dim}d(ctx, ptr);
+        bindings::futhark_free_{rust_type}_{dim}d(ctx, ptr)
     }}}}"#, rust_type=captures[1].to_owned(), dim=dim, array_dim=array_dim_expansion(dim)
     ).expect("Write failed!");
     buffer
