@@ -65,7 +65,7 @@ impl FutharkType for futhark_{rust_type}_{dim}d {{
         let ctx = ctx.into();
         let ret = bindings::futhark_values_{rust_type}_{dim}d(ctx, ptr, dst);
         if ret != 0 {{
-            return Err(FutharkError::new(ctx));
+            return Err(crate::FutharkError::new(ctx).into());
         }} 
         // Sync the values to the array.
         bindings::futhark_context_sync(ctx);
