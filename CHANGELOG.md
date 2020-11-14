@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.1
+
+- Build on macos. ([#27](https://github.com/Erk-/genfut/pull/27))
+
 ## 0.4.0
 
 - Implement std::error::Error for FutharkError and Error ([#26](https://github.com/Erk-/genfut/pull/26))
