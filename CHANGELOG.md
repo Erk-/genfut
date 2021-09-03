@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.2
+
+- Update array type regex to account for missing whitespace, to
+  support futhark 0.19+
+  ([#28](https://github.com/Erk-/genfut/pull/28))
+
 ## 0.4.1
 
 - Build on macos. ([#27](https://github.com/Erk-/genfut/pull/27))
