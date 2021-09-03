@@ -138,7 +138,7 @@ pub fn genfut(opt: Opt) {
     let headers = std::fs::read_to_string(PathBuf::from(out_dir).join("lib/a.h"))
         .expect("Could not read headers");
 
-    let re_array_types = Regex::new(r"struct (futhark_.+_\d+d) ;").expect("Regex failed!");
+    let re_array_types = Regex::new(r"struct (futhark_.+_\d+d)\s*;").expect("Regex failed!");
     let array_types: Vec<String> = re_array_types
         .captures_iter(&headers)
         .map(|c| c[1].to_owned())
