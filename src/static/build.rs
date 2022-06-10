@@ -1,4 +1,5 @@
 extern crate cc;
+use std::process::Command;
 
 fn main() {
     // Sequential C support
@@ -10,6 +11,41 @@ fn main() {
         .shared_flag(true)
         .warnings(false)
         .compile("a");
+
+    // Multicore C support
+    #[cfg(feature = "multicore_c")]
+    cc::Build::new()
+        .file("./lib/a.c")
+        .flag("-fPIC")
+        .flag("-pthread")
+        .flag("-lm")
+        .flag("-std=c99")
+        .shared_flag(true)
+        .warnings(false)
+        .compile("a");
+
+    // Multicore ISPC support
+    #[cfg(feature = "ispc")]
+    {
+        let mut ispc = Command::new("ispc");
+        ispc.arg("./lib/a.kernels.ispc")
+            .arg("-o").arg("./lib/a.kernels.o")
+            .arg("--pic")
+            .arg("--addressing=64")
+            .arg("--target=host");
+        ispc.output().expect("Failed to invoke ispc.");
+
+        cc::Build::new()
+            .file("./lib/a.c")
+            .object("./lib/a.kernels.o")
+            .flag("-fPIC")
+            .flag("-pthread")
+            .flag("-lm")
+            .flag("-std=c99")
+            .shared_flag(true)
+            .warnings(false)
+            .compile("a");
+    }
 
     // CUDA support
     #[cfg(feature = "cuda")]

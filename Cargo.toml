@@ -20,6 +20,8 @@ structopt = "0.3.2"
 [features]
 default = ["sequential_c"]
 sequential_c = []
+multicore_c = []
+ispc = []
 cuda = []
 opencl = []
 no_futhark = []
