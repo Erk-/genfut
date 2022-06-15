@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.3
+
+- Multicore and ISPC support
+  ([#30](https://github.com/Erk-/genfut/pull/30))
+
 ## 0.4.2
 
 - Update array type regex to account for missing whitespace, to
