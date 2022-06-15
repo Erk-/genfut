@@ -1,7 +1,7 @@
 //! Binary to generate the matmul library
 
 extern crate genfut;
-use genfut::{genfut, Opt};
+use genfut::{genfut, Opt, Backend};
 
 fn main() {
     genfut(Opt {
@@ -11,5 +11,6 @@ fn main() {
         version: "0.1.0".to_string(),
         license: "YOLO".to_string(),
         description: "Futhark matrix multiplication example".to_string(),
+        backend: Backend::SequentialC,
     })
 }

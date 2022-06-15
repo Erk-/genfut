@@ -1,7 +1,7 @@
 use genfut::{genfut, Opt};
-use structopt::StructOpt;
+use clap::Parser;
 
 fn main() {
-    let opt = Opt::from_args();
+    let opt = Opt::parse();
     genfut(opt);
 }

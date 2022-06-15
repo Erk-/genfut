@@ -11,17 +11,11 @@ readme = "README.md"
 repository = "https://github.com/Erk-/genfut"
 
 [dependencies]
-bindgen = "0.54.0"
-cc = "1.0.45"
+bindgen = "0.60.0"
+cc = "1.0.73"
 Inflector = "0.11.4"
 regex = "1"
-structopt = "0.3.2"
+clap = { version = "3.2.4", features = ["derive"] }
 
 [features]
-default = ["sequential_c"]
-sequential_c = []
-multicore_c = []
-ispc = []
-cuda = []
-opencl = []
-no_futhark = []
+default = []
