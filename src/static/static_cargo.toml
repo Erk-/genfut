@@ -12,7 +12,7 @@ license = "{license}"
 cc = "1.0"
 
 [features]
-default = ["sequential_c"]
+default = ["{backend}"]
 sequential_c = []
 multicore_c = []
 ispc = []

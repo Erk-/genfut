@@ -2,12 +2,61 @@ use std::fs::create_dir_all;
 use std::io::{self, Write};
 use std::path::PathBuf;
 use std::process::Command;
+use std::str::FromStr;
 
-#[cfg(not(any(feature = "opencl", feature = "cuda", feature = "sequential_c", feature = "multicore_c", feature = "ispc")))]
-pub(crate) fn gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {}
+#[derive(Debug, Clone, Copy)]
+pub enum Backend {
+    Cuda,
+    ISPC,
+    MulticoreC,
+    None,
+    OpenCL,
+    SequentialC,
+}
 
-#[cfg(feature = "sequential_c")]
-pub(crate) fn gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {
+impl FromStr for Backend {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.to_lowercase();
+
+        match s.trim() {
+            "cuda" => Ok(Backend::Cuda),
+            "ispc" => Ok(Backend::ISPC),
+            "multicore_c" => Ok(Backend::MulticoreC),
+            "none" => Ok(Backend::None),
+            "opencl" => Ok(Backend::OpenCL),
+            "sequential_c" => Ok(Backend::SequentialC),
+            _ => Err("Unknown backend, availible backends are: cuda, ispc, multicore_c, none, opencl, sequential_c.".to_owned()),
+        }
+    }
+}
+
+impl Backend {
+    pub(crate) fn to_feature(self) -> &'static str {
+        match self {
+            Backend::Cuda => "cuda",
+            Backend::ISPC => "ispc",
+            Backend::MulticoreC => "multicore_c",
+            Backend::None => "none",
+            Backend::OpenCL => "opencl",
+            Backend::SequentialC => "sequential_c",
+        }
+    }
+}
+
+pub(crate) fn gen_c(backend: Backend, in_file: &std::path::Path, out_dir: &std::path::Path) {
+    match backend {
+        Backend::Cuda => cuda_gen_c(in_file, out_dir),
+        Backend::ISPC => ispc_gen_c(in_file, out_dir),
+        Backend::MulticoreC => multicore_gen_c(in_file, out_dir),
+        Backend::None => { /* Intentionally left empty */ },
+        Backend::OpenCL => opencl_gen_c(in_file, out_dir),
+        Backend::SequentialC => seq_gen_c(in_file, out_dir),
+    }
+}
+
+fn seq_gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {
     let out_path = PathBuf::from(out_dir);
     let lib_dir = out_path.join("lib");
     if let Err(e) = create_dir_all(lib_dir.clone()) {
@@ -29,8 +78,7 @@ pub(crate) fn gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {
     io::stderr().write_all(&output.stderr).unwrap();
 }
 
-#[cfg(feature = "multicore_c")]
-pub(crate) fn gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {
+fn multicore_gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {
     let out_path = PathBuf::from(out_dir);
     let lib_dir = out_path.join("lib");
     if let Err(e) = create_dir_all(lib_dir.clone()) {
@@ -52,8 +100,7 @@ pub(crate) fn gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {
     io::stderr().write_all(&output.stderr).unwrap();
 }
 
-#[cfg(feature = "ispc")]
-pub(crate) fn gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {
+fn ispc_gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {
     let out_path = PathBuf::from(out_dir);
     let lib_dir = out_path.join("lib");
     if let Err(e) = create_dir_all(lib_dir.clone()) {
@@ -75,8 +122,7 @@ pub(crate) fn gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {
     io::stderr().write_all(&output.stderr).unwrap();
 }
 
-#[cfg(feature = "cuda")]
-pub(crate) fn gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {
+fn cuda_gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {
     let out_path = PathBuf::from(out_dir);
     let lib_dir = out_path.join("lib");
     if let Err(e) = create_dir_all(lib_dir.clone()) {
@@ -98,8 +144,7 @@ pub(crate) fn gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {
     io::stderr().write_all(&output.stderr).unwrap();
 }
 
-#[cfg(feature = "opencl")]
-pub(crate) fn gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {
+fn opencl_gen_c(in_file: &std::path::Path, out_dir: &std::path::Path) {
     let out_path = PathBuf::from(out_dir);
     let lib_dir = out_path.join("lib");
     if let Err(e) = create_dir_all(lib_dir.clone()) {

@@ -37,7 +37,7 @@ use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
-use structopt::StructOpt;
+use clap::Parser;
 
 use regex::Regex;
 
@@ -46,40 +46,47 @@ mod entry;
 mod genc;
 use crate::arrays::gen_impl_futhark_types;
 use crate::entry::*;
-use crate::genc::*;
+use crate::genc::{gen_c, generate_bindings};
+pub use crate::genc::Backend;
 
-#[derive(StructOpt, Debug)]
-#[structopt(
-    name = "genfut",
-    about = "Generates rust code to interface with generated futhark code."
-)]
+#[derive(Parser, Debug)]
+#[clap(author, version, about)]
 pub struct Opt {
     /// Output dir
-    #[structopt(name = "NAME")]
+    #[clap(name = "NAME")]
     pub name: String,
 
     /// File to process
-    #[structopt(name = "FILE", parse(from_os_str))]
+    #[clap(name = "FILE", parse(from_os_str))]
     pub file: PathBuf,
 
     /// License
-    #[structopt(name = "LICENSE", default_value = "MIT")]
+    #[clap(long, name = "LICENSE", default_value = "MIT")]
     pub license: String,
 
     /// Author
-    #[structopt(name = "AUTHOR", default_value = "Name <name@example.com>")]
+    #[clap(long, name = "AUTHOR", default_value = "Name <name@example.com>")]
     pub author: String,
 
     /// Version
-    #[structopt(name = "VERSION", default_value = "0.1.0")]
+    #[clap(long, name = "VERSION", default_value = "0.1.0")]
     pub version: String,
 
     /// Description
-    #[structopt(
+    #[clap(
+        long,
         name = "DESCRIPTION",
         default_value = "Rust interface to Futhark library"
     )]
     pub description: String,
+
+    /// Backend
+    #[clap(
+        long,
+        name = "BACKEND",
+        default_value = "sequential_c",
+    )]
+    pub backend: Backend,
 }
 
 pub fn genfut(opt: Opt) {
@@ -112,7 +119,7 @@ pub fn genfut(opt: Opt) {
 
     // Generate C code, Though only headerfiles are needed.
     // In general C files are generated when build at the user.
-    gen_c(&futhark_file, &out_dir);
+    gen_c(opt.backend, &futhark_file, &out_dir);
 
     // copy futhark file
     if let Err(e) = std::fs::copy(futhark_file, PathBuf::from(out_dir).join("lib/a.fut")) {
@@ -160,6 +167,7 @@ pub fn genfut(opt: Opt) {
         author = &opt.author,
         version = &opt.version,
         license = &opt.license,
+        backend = opt.backend.to_feature(),
     );
     let mut cargo_file =
         File::create(PathBuf::from(out_dir).join("Cargo.toml")).expect("File creation failed!");
