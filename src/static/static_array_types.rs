@@ -4,7 +4,6 @@ pub struct {array_type} {{
     ctx: *mut bindings::futhark_context,
 }}
 
-
 impl {array_type} {{
     pub(crate) unsafe fn as_raw(&self) -> *const {futhark_type} {{
          self.ptr
@@ -52,12 +51,12 @@ impl {array_type} {{
         let ctx = self.ctx;
         unsafe {{
             futhark_context_sync(ctx);
-            let shape = Self::shape(ctx, self.as_raw());
+            let shape = Self::shape(ctx, self.as_raw());      
             let elems = shape.iter().fold(1, |acc, e| acc * e) as usize;
             let mut buffer: Vec<{inner_type}> =
                 vec![{inner_type}::default(); elems];
-            let cint = {futhark_type}::values(ctx, self.as_raw_mut(), buffer.as_mut_ptr())?;
-            Ok((buffer, shape.to_owned()))
+            {futhark_type}::values(ctx, self.as_raw_mut(), buffer.as_mut_ptr())?;
+            Ok((buffer, shape))
         }}
     }}
 

@@ -31,13 +31,13 @@
 #![allow(unused_must_use)]
 #![allow(unused_variables)]
 
+use clap::Parser;
 use std::fs::create_dir_all;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
-use clap::Parser;
 
 use regex::Regex;
 
@@ -46,8 +46,8 @@ mod entry;
 mod genc;
 use crate::arrays::gen_impl_futhark_types;
 use crate::entry::*;
-use crate::genc::{gen_c, generate_bindings};
 pub use crate::genc::Backend;
+use crate::genc::{gen_c, generate_bindings};
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about)]
@@ -81,11 +81,7 @@ pub struct Opt {
     pub description: String,
 
     /// Backend
-    #[clap(
-        long,
-        name = "BACKEND",
-        default_value = "sequential_c",
-    )]
+    #[clap(long, name = "BACKEND", default_value = "sequential_c")]
     pub backend: Backend,
 }
 
@@ -119,7 +115,7 @@ pub fn genfut(opt: Opt) {
 
     // Generate C code, Though only headerfiles are needed.
     // In general C files are generated when build at the user.
-    gen_c(opt.backend, &futhark_file, &out_dir);
+    gen_c(opt.backend, futhark_file, out_dir);
 
     // copy futhark file
     if let Err(e) = std::fs::copy(futhark_file, PathBuf::from(out_dir).join("lib/a.fut")) {

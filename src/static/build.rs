@@ -1,5 +1,4 @@
 extern crate cc;
-use std::process::Command;
 
 fn main() {
     // Sequential C support
@@ -8,6 +7,7 @@ fn main() {
         .file("./lib/a.c")
         .flag("-fPIC")
         .flag("-std=c99")
+        .flag("-O3")
         .shared_flag(true)
         .warnings(false)
         .compile("a");
@@ -19,6 +19,7 @@ fn main() {
         .flag("-fPIC")
         .flag("-pthread")
         .flag("-lm")
+        .flag("-O3")
         .flag("-std=c99")
         .shared_flag(true)
         .warnings(false)
@@ -27,10 +28,12 @@ fn main() {
     // Multicore ISPC support
     #[cfg(feature = "ispc")]
     {
-        let mut ispc = Command::new("ispc");
+        let mut ispc = std::process::Command::new("ispc");
         ispc.arg("./lib/a.kernels.ispc")
-            .arg("-o").arg("./lib/a.kernels.o")
+            .arg("-o")
+            .arg("./lib/a.kernels.o")
             .arg("--pic")
+            .arg("-O3")
             .arg("--addressing=64")
             .arg("--target=host");
         ispc.output().expect("Failed to invoke ispc.");
@@ -39,6 +42,7 @@ fn main() {
             .file("./lib/a.c")
             .object("./lib/a.kernels.o")
             .flag("-fPIC")
+            .flag("-O3")
             .flag("-pthread")
             .flag("-lm")
             .flag("-std=c99")
@@ -54,7 +58,8 @@ fn main() {
         .cuda(true)
         .flag("-Xcompiler")
         .flag("-fPIC")
-        .flag("-std=c99")
+        .flag("-std=c++03")
+        .flag("-O3")
         .flag("-w")
         .shared_flag(true)
         .compile("a");
@@ -76,6 +81,7 @@ fn main() {
                 .file("./lib/a.c")
                 .flag("-fPIC")
                 .flag("-std=c99")
+                .flag("-O3")
                 .shared_flag(true)
                 .compile("a");
             println!("cargo:rustc-link-lib=dylib=OpenCL");
@@ -86,6 +92,7 @@ fn main() {
                 .file("./lib/a.c")
                 .flag("-fPIC")
                 .flag("-std=c99")
+                .flag("-O3")
                 .shared_flag(true)
                 .compile("a");
             println!("cargo:rustc-link-lib=framework=OpenCL");

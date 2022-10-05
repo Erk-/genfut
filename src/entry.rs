@@ -5,7 +5,7 @@ use regex::Regex;
 
 fn type_translation(input: String) -> String {
     if input.starts_with("futhark") {
-        format!("{}", auto_ctor(&input))
+        auto_ctor(&input)
     } else {
         let mut buffer = String::new();
         if input.starts_with("int8") {
@@ -66,7 +66,7 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String, Vec<String>) {
     write!(&mut buffer, "(&mut self, ");
     for (i, (argtype, argname)) in arg_pairs.iter().enumerate() {
         if argname.starts_with("in") {
-            let argtype_string = type_translation(String::from(argtype.clone()));
+            let argtype_string = type_translation(argtype.clone());
             write!(
                 &mut buffer,
                 "{}: {}{}, ",
@@ -89,11 +89,7 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String, Vec<String>) {
                 write!(&mut output_buffer, ", ");
             }
             output_counter += 1;
-            write!(
-                &mut output_buffer,
-                "{}",
-                type_translation(String::from(argtype.clone()))
-            );
+            write!(&mut output_buffer, "{}", type_translation(argtype.clone()));
         }
     }
     write!(&mut output_buffer, ")>");
@@ -131,7 +127,7 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String, Vec<String>) {
                     &mut buffer2,
                     "{}: {}, ",
                     argname,
-                    type_translation(String::from(argtype.clone()))
+                    type_translation(argtype.clone())
                 );
             }
         }
@@ -150,7 +146,7 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String, Vec<String>) {
                     &mut buffer2,
                     "let mut raw_{} = {}::default();",
                     argname,
-                    type_translation(String::from(argtype.clone()))
+                    type_translation(argtype.clone())
                 );
             }
         }
@@ -183,7 +179,7 @@ return Err(FutharkError::new(ctx).into());}}"
     write!(&mut buffer2, "Ok((");
     for (i, (argtype, argname)) in arg_pairs.iter().enumerate() {
         if argname.starts_with("out") {
-            if !parse_array_type(argtype).is_some() {
+            if parse_array_type(argtype).is_none() {
                 opaque_types.push(argtype.clone());
             }
             if result_counter > 0 {
@@ -194,7 +190,7 @@ return Err(FutharkError::new(ctx).into());}}"
                 writeln!(
                     &mut buffer2,
                     "{}::from_ptr(ctx, raw_{})",
-                    auto_ctor(&argtype),
+                    auto_ctor(argtype),
                     argname
                 );
             } else {
@@ -219,10 +215,11 @@ fn gen_opaque_type(opaque_type: &str) -> String {
     let rust_opaque_type = to_opaque_type_name(opaque_type);
     assert!(opaque_type.starts_with("futhark_"),);
     let base_type = &opaque_type[8..];
+    let bindings = format!("bindings::{}", opaque_type);
     format!(
         include_str!("static/static_opaque_types.rs"),
         opaque_type = rust_opaque_type,
-        futhark_type = format!("bindings::{}", opaque_type),
+        futhark_type = bindings,
         base_type = base_type
     )
 }
@@ -235,7 +232,7 @@ pub(crate) fn gen_entry_points(input: &Vec<String>) -> String {
     let mut opaque_types = Vec::new();
     let mut buffer2 = String::new();
     for t in input {
-        let (a, b, otypes) = gen_entry_point(&t);
+        let (a, b, otypes) = gen_entry_point(t);
         opaque_types.extend(otypes);
         writeln!(&mut buffer, "{}", a).expect("Write failed!");
         writeln!(&mut buffer2, "{}", b).expect("Write failed!");
