@@ -7,9 +7,17 @@ pub struct FutharkContext {
     pub config: *mut bindings::futhark_context_config,
 }
 
+// impl Drop for FutharkContext {
+
+// }
+
 // Safe to implement because Futhark has internal synchronization.
 unsafe impl Sync for FutharkContext {}
 unsafe impl Send for FutharkContext {}
+
+// I recommend adding an implementation of the Drop trait for
+// FutharkContext, which should call futhark_context_free() and
+// futhark_context_config_free() (in that order)
 
 impl FutharkContext {
     pub fn new() -> Result<Self> {
@@ -27,6 +35,13 @@ impl FutharkContext {
             } else {
                 Err(FutharkError::_new(err).into())
             }
+        }
+    }
+
+    pub fn free(&mut self) {
+        unsafe {
+            bindings::futhark_context_free(self.context);
+            bindings::futhark_context_config_free(self.config);
         }
     }
 
