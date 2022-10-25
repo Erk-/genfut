@@ -81,7 +81,7 @@ pub struct Opt {
     pub description: String,
 
     /// Backend
-    #[clap(long, name = "BACKEND", default_value = "sequential_c")]
+    #[clap(long, name = "BACKEND", default_value = "c")]
     pub backend: Backend,
 }
 

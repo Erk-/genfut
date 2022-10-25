@@ -13,8 +13,8 @@ cc = "1.0"
 
 [features]
 default = ["{backend}"]
-sequential_c = []
-multicore_c = []
+c = []
+multicore = []
 ispc = []
 cuda = []
 opencl = []
