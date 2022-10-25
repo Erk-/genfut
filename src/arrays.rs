@@ -86,7 +86,6 @@ pub(crate) fn gen_impl_futhark_types(input: &Vec<String>) -> String {
     let mut buffer2 = String::new();
     writeln!(&mut buffer, "use crate::bindings::*;").expect("Write failed!");
     for t in input {
-        println!("{}", t);
         writeln!(&mut buffer, "{}", gen_impl_futhark_type(t)).expect("Write failed!");
         writeln!(&mut buffer2, "{}", gen_specific_type(t)).expect("Write failed!");
     }
