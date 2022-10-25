@@ -70,8 +70,6 @@ pub fn genfut(opt: Opt) {
     #[cfg(not(feature = "no_futhark"))]
     {
         let mut futhark_cmd = Command::new("futhark");
-        futhark_cmd.arg("pkg").arg("sync");
-        let _ = futhark_cmd.output().expect("failed: futhark pkg sync");
 
         let version_path = PathBuf::from(&out_dir).join("futhark-version.txt");
         let mut version_file =
