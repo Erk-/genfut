@@ -60,8 +60,25 @@ pub(crate) fn gen_c(backend: Backend, in_file: &std::path::Path, out_dir: &std::
         .arg(in_file)
         .output()
         .expect("[gen_c] failed to execute process");
-    io::stdout().write_all(&output.stdout).unwrap();
-    io::stderr().write_all(&output.stderr).unwrap();
+    println!("Futhark Status: {}", output.status);
+    println!(
+        "Futhark stdout: {}",
+        output
+            .stdout
+            .iter()
+            .map(|elm| elm.to_string())
+            .collect::<Vec<_>>()
+            .join(",")
+    );
+    println!(
+        "Futhark stderr: {}",
+        output
+            .stderr
+            .iter()
+            .map(|elm| elm.to_string())
+            .collect::<Vec<_>>()
+            .join(",")
+    );
 }
 
 pub(crate) fn generate_bindings(header: &std::path::Path, out: &std::path::Path) {
