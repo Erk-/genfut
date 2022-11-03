@@ -63,21 +63,11 @@ pub(crate) fn gen_c(backend: Backend, in_file: &std::path::Path, out_dir: &std::
     println!("Futhark Status: {}", output.status);
     println!(
         "Futhark stdout: {}",
-        output
-            .stdout
-            .iter()
-            .map(|elm| elm.to_string())
-            .collect::<Vec<_>>()
-            .join(",")
+        String::from_utf8(output.stdout).unwrap()
     );
     println!(
         "Futhark stderr: {}",
-        output
-            .stderr
-            .iter()
-            .map(|elm| elm.to_string())
-            .collect::<Vec<_>>()
-            .join(",")
+        String::from_utf8(output.stderr).unwrap()
     );
 }
 
