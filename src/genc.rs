@@ -1,3 +1,4 @@
+use core::panic;
 use std::fs::create_dir_all;
 use std::io::{self, Write};
 use std::path::PathBuf;
@@ -69,6 +70,9 @@ pub(crate) fn gen_c(backend: Backend, in_file: &std::path::Path, out_dir: &std::
         "Futhark stderr: {}",
         String::from_utf8(output.stderr).unwrap()
     );
+    if !output.status.success() {
+        panic!("Futhark did not run successfully.")
+    }
 }
 
 pub(crate) fn generate_bindings(header: &std::path::Path, out: &std::path::Path) {
