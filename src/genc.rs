@@ -61,16 +61,16 @@ pub(crate) fn gen_c(backend: Backend, in_file: &std::path::Path, out_dir: &std::
         .arg(in_file)
         .output()
         .expect("[gen_c] failed to execute process");
-    println!("Futhark status: {}", output.status);
-    println!(
-        "Futhark stdout: {}",
-        String::from_utf8(output.stdout).unwrap()
-    );
-    println!(
-        "Futhark stderr: {}",
-        String::from_utf8(output.stderr).unwrap()
-    );
     if !output.status.success() {
+        println!(
+            "Futhark stdout: {}",
+            String::from_utf8(output.stdout).unwrap()
+        );
+        println!(
+            "Futhark stderr: {}",
+            String::from_utf8(output.stderr).unwrap()
+        );
+        println!("Futhark status: {}", output.status);
         panic!("Futhark did not run successfully.")
     }
 }
