@@ -6,6 +6,8 @@
 #![allow(dead_code)]
 #![allow(improper_ctypes)]
 #![allow(unused_imports)]
+#![allow(clippy::double_parens)]
+#![allow(clippy::unnecessary_fold)]
 
 mod arrays;
 pub mod bindings;

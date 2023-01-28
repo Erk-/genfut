@@ -1,5 +1,4 @@
 //! Example of how to use the built matmul library
-
 use matmul::{Array_i32_2d, Error, FutharkContext};
 
 fn main() -> Result<(), Error> {
