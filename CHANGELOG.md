@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0
+
+- Various suggestions for changes and improvements. ([#35](https://github.com/Erk-/genfut/pull/35))
+  - Renames `SequentialC` to `C`, and `MulticoreC` to `Multicore`.
+  - Panics and stops the process if the futhark compilation fails, instead of potentially failing silently.
+  - Adds optimization flags for the different backends in build.rs.
+- Move src/bin/main.rs -> src/main.rs to make `cargo install` work ([#36](https://github.com/Erk-/genfut/pull/36))
+- Backend selection with a enum instead of features ([#31](https://github.com/Erk-/genfut/pull/31))
+
 ## 0.4.3
 
 - Multicore and ISPC support
