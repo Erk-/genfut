@@ -65,7 +65,7 @@ pub(crate) fn gen_c(backend: Backend, in_file: &std::path::Path, out_dir: &std::
             "Futhark stdout: {}",
             String::from_utf8(output.stdout).unwrap()
         );
-        println!(
+        eprintln!(
             "Futhark stderr: {}",
             String::from_utf8(output.stderr).unwrap()
         );
