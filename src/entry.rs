@@ -5,7 +5,7 @@ use regex::Regex;
 
 fn type_translation(input: &str) -> String {
     if input.starts_with("futhark") {
-        auto_ctor(&input)
+        auto_ctor(input)
     } else {
         let mut buffer = String::new();
         if input.starts_with("int8") {
@@ -66,7 +66,7 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String, Vec<String>) {
     write!(&mut buffer, "(&mut self, ");
     for (i, (argtype, argname)) in arg_pairs.iter().enumerate() {
         if argname.starts_with("in") {
-            let argtype_string = type_translation(argtype.clone());
+            let argtype_string = type_translation(argtype);
             write!(
                 &mut buffer,
                 "{}: {}{}, ",
@@ -89,7 +89,7 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String, Vec<String>) {
                 write!(&mut output_buffer, ", ");
             }
             output_counter += 1;
-            write!(&mut output_buffer, "{}", type_translation(argtype.clone()));
+            write!(&mut output_buffer, "{}", type_translation(argtype));
         }
     }
     write!(&mut output_buffer, ")>");
@@ -123,12 +123,7 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String, Vec<String>) {
             if argtype.starts_with("futhark") {
                 write!(&mut buffer2, "{}: *const bindings::{}, ", argname, argtype);
             } else {
-                write!(
-                    &mut buffer2,
-                    "{}: {}, ",
-                    argname,
-                    type_translation(argtype.clone())
-                );
+                write!(&mut buffer2, "{}: {}, ", argname, type_translation(argtype));
             }
         }
     }
@@ -146,7 +141,7 @@ pub(crate) fn gen_entry_point(input: &str) -> (String, String, Vec<String>) {
                     &mut buffer2,
                     "let mut raw_{} = {}::default();",
                     argname,
-                    type_translation(argtype.clone())
+                    type_translation(argtype)
                 );
             }
         }

@@ -1,7 +1,7 @@
 use clap::Parser;
-use genfut::{genfut, Opt};
+use genfut::{genfut, Options};
 
 fn main() {
-    let opt = Opt::parse();
+    let opt = Options::parse();
     genfut(opt);
 }

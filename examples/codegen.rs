@@ -1,12 +1,12 @@
 //! Binary to generate the matmul library
 
 extern crate genfut;
-use genfut::{genfut, Backend, Opt};
+use genfut::{genfut, Backend, Options};
 
 fn main() {
-    genfut(Opt {
+    genfut(Options {
         name: "matmul".to_string(),
-        file: std::path::PathBuf::from("matmul.fut"),
+        file: std::path::PathBuf::from("./matmul.fut"),
         author: "Name <name@example.com>".to_string(),
         version: "0.1.0".to_string(),
         license: "MIT".to_string(),

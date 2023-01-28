@@ -13,22 +13,20 @@
 //!
 //!`build.rs`
 //!```rust, no_run
-//!use genfut::{Opt, genfut};
+//! use genfut::{Opt, genfut};
 //!
-//!fn main() {
-//!    genfut(Opt {
-//!        name: "<Rust lib name>".to_string(),
-//!        file: std::path::PathBuf::from("futhark_file.fut"),
-//!        author: "Name <name@example.com>".to_string(),
-//!        version: "0.1.0".to_string(),
-//!        license: "YOLO".to_string(),
-//!        description: "Futhark example".to_string(),
-//!    })
-//!}
-//!
+//! genfut(Opt {
+//!     name: "<Rust lib name>".to_string(),
+//!     file: std::path::PathBuf::from("futhark_file.fut"),
+//!     author: "Name <name@example.com>".to_string(),
+//!     version: "0.1.0".to_string(),
+//!     license: "YOLO".to_string(),
+//!     description: "Futhark example".to_string(),
+//! })
 //!```
 #![allow(unused_must_use)]
 #![allow(unused_variables)]
+#![allow(clippy::uninlined_format_args)]
 
 use clap::Parser;
 use std::fs::create_dir_all;
@@ -49,30 +47,30 @@ pub use crate::genc::Backend;
 use crate::genc::{gen_c, generate_bindings};
 
 #[derive(Parser, Debug)]
-#[clap(author, version, about)]
-pub struct Opt {
+#[command(author, version, about)]
+pub struct Options {
     /// Output dir
-    #[clap(name = "NAME")]
+    #[arg(name = "NAME")]
     pub name: String,
 
     /// File to process
-    #[clap(name = "FILE", parse(from_os_str))]
+    #[arg(name = "FILE")]
     pub file: PathBuf,
 
     /// License
-    #[clap(long, name = "LICENSE", default_value = "MIT")]
+    #[arg(long, name = "LICENSE", default_value = "MIT")]
     pub license: String,
 
     /// Author
-    #[clap(long, name = "AUTHOR", default_value = "Name <name@example.com>")]
+    #[arg(long, name = "AUTHOR", default_value = "Name <name@example.com>")]
     pub author: String,
 
     /// Version
-    #[clap(long, name = "VERSION", default_value = "0.1.0")]
+    #[arg(long, name = "VERSION", default_value = "0.1.0")]
     pub version: String,
 
     /// Description
-    #[clap(
+    #[arg(
         long,
         name = "DESCRIPTION",
         default_value = "Rust interface to Futhark library"
@@ -80,13 +78,13 @@ pub struct Opt {
     pub description: String,
 
     /// Backend
-    #[clap(long, name = "BACKEND", default_value = "c")]
+    #[arg(long, name = "BACKEND", default_value = "c")]
     pub backend: Backend,
 }
 
-pub fn genfut(opt: Opt) {
-    let name = opt.name;
-    let futhark_file = &opt.file;
+pub fn genfut(options: Options) {
+    let name = options.name;
+    let futhark_file = &options.file;
     let out_dir_str: String = format!("./{}", name);
     let out_dir = Path::new(&out_dir_str);
 
@@ -112,7 +110,7 @@ pub fn genfut(opt: Opt) {
 
     // Generate C code, Though only headerfiles are needed.
     // In general C files are generated when build at the user.
-    gen_c(opt.backend, futhark_file, out_dir);
+    gen_c(options.backend, futhark_file, out_dir);
 
     // copy futhark file
     if let Err(e) = std::fs::copy(futhark_file, PathBuf::from(out_dir).join("lib/a.fut")) {
@@ -156,11 +154,11 @@ pub fn genfut(opt: Opt) {
     let static_cargo = format!(
         include_str!("static/static_cargo.toml"),
         libname = name,
-        description = &opt.description,
-        author = &opt.author,
-        version = &opt.version,
-        license = &opt.license,
-        backend = opt.backend.to_feature(),
+        description = &options.description,
+        author = &options.author,
+        version = &options.version,
+        license = &options.license,
+        backend = options.backend.to_feature(),
     );
     let mut cargo_file =
         File::create(PathBuf::from(out_dir).join("Cargo.toml")).expect("File creation failed!");
