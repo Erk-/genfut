@@ -3,7 +3,7 @@ use std::fmt::Write;
 use inflector::Inflector;
 use regex::Regex;
 
-fn type_translation(input: String) -> String {
+fn type_translation(input: &str) -> String {
     if input.starts_with("futhark") {
         auto_ctor(&input)
     } else {
