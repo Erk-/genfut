@@ -38,6 +38,10 @@ impl FutharkContext {
         }
     }
 
+    // calling free() will cause any new calls using this context to fail
+    // TODO: free should take Self as an argument, so that the context cannot
+    // be used after having been freed.
+    // See https://github.com/Erk-/genfut/pull/20
     pub fn free(&mut self) {
         unsafe {
             bindings::futhark_context_free(self.context);
