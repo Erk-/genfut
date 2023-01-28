@@ -1,3 +1,32 @@
+//!# Genfut
+//!
+//!This is a tool to generate a Rust library to interact with exported functions from a Futhark file.
+//!
+//!## Usage
+//!
+//!### As an executable binary
+//!```shell
+//!genfut <Rust lib name> <futhark_file.fut>
+//!```
+//!
+//!### As a library
+//!
+//!`build.rs`
+//!```rust, no_run
+//!use genfut::{Opt, genfut};
+//!
+//!fn main() {
+//!    genfut(Opt {
+//!        name: "<Rust lib name>".to_string(),
+//!        file: std::path::PathBuf::from("futhark_file.fut"),
+//!        author: "Name <name@example.com>".to_string(),
+//!        version: "0.1.0".to_string(),
+//!        license: "YOLO".to_string(),
+//!        description: "Futhark example".to_string(),
+//!    })
+//!}
+//!
+//!```
 #![allow(unused_must_use)]
 #![allow(unused_variables)]
 
